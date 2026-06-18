@@ -33,6 +33,7 @@ export default function Canvas({ exportRef }) {
   const [ctxMenu, setCtxMenu] = useState(null)
   const [quickAdd, setQuickAdd] = useState(null) // { screenX, screenY, flowX, flowY, sourceNodeId? }
   const connectingFrom = useRef(null) // nodeId being dragged from
+  const suppressNextPaneClick = useRef(false)
 
   // Expose fns to parent via ref object
   useEffect(() => {
@@ -136,15 +137,19 @@ export default function Canvas({ exportRef }) {
   }, [])
 
   const onConnectEnd = useCallback((event, connectionState) => {
-    if (connectionState?.isValid) { connectingFrom.current = null; return }
     const sourceNodeId = connectingFrom.current
     connectingFrom.current = null
-    if (!sourceNodeId) return
-    const pos = screenToFlowPosition({ x: event.clientX, y: event.clientY })
-    setQuickAdd({ screenX: event.clientX, screenY: event.clientY, flowX: pos.x, flowY: pos.y, sourceNodeId })
+    if (connectionState?.isValid || !sourceNodeId) return
+    const clientX = event.clientX ?? event.changedTouches?.[0]?.clientX
+    const clientY = event.clientY ?? event.changedTouches?.[0]?.clientY
+    if (clientX == null) return
+    const pos = screenToFlowPosition({ x: clientX, y: clientY })
+    suppressNextPaneClick.current = true
+    setQuickAdd({ screenX: clientX, screenY: clientY, flowX: pos.x, flowY: pos.y, sourceNodeId })
   }, [screenToFlowPosition])
 
   const onPaneClick = useCallback(() => {
+    if (suppressNextPaneClick.current) { suppressNextPaneClick.current = false; return }
     setSelectedNodeId(null)
     setCtxMenu(null)
     setQuickAdd(null)
