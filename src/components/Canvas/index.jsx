@@ -31,7 +31,8 @@ export default function Canvas({ exportRef }) {
 
   const { screenToFlowPosition, fitView } = useReactFlow()
   const [ctxMenu, setCtxMenu] = useState(null)
-  const [quickAdd, setQuickAdd] = useState(null) // { screenX, screenY, flowX, flowY }
+  const [quickAdd, setQuickAdd] = useState(null) // { screenX, screenY, flowX, flowY, sourceNodeId? }
+  const connectingFrom = useRef(null) // nodeId being dragged from
 
   // Expose fns to parent via ref object
   useEffect(() => {
@@ -130,6 +131,19 @@ export default function Canvas({ exportRef }) {
     setCtxMenu({ x: e.clientX, y: e.clientY, nodeId: node.id })
   }, [])
 
+  const onConnectStart = useCallback((_, { nodeId }) => {
+    connectingFrom.current = nodeId
+  }, [])
+
+  const onConnectEnd = useCallback((event, connectionState) => {
+    if (connectionState?.isValid) { connectingFrom.current = null; return }
+    const sourceNodeId = connectingFrom.current
+    connectingFrom.current = null
+    if (!sourceNodeId) return
+    const pos = screenToFlowPosition({ x: event.clientX, y: event.clientY })
+    setQuickAdd({ screenX: event.clientX, screenY: event.clientY, flowX: pos.x, flowY: pos.y, sourceNodeId })
+  }, [screenToFlowPosition])
+
   const onPaneClick = useCallback(() => {
     setSelectedNodeId(null)
     setCtxMenu(null)
@@ -212,6 +226,8 @@ export default function Canvas({ exportRef }) {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onConnectStart={onConnectStart}
+        onConnectEnd={onConnectEnd}
         onNodeDragStop={onNodeDragStop}
         onDrop={onDrop}
         onDragOver={onDragOver}
@@ -244,8 +260,13 @@ export default function Canvas({ exportRef }) {
         <QuickAddMenu
           screenX={quickAdd.screenX}
           screenY={quickAdd.screenY}
+          sourceNodeId={quickAdd.sourceNodeId}
           onSelect={(type) => {
-            addNode(type, { x: quickAdd.flowX - 110, y: quickAdd.flowY - 50 })
+            if (quickAdd.sourceNodeId) {
+              useStore.getState().addConnectedNode(quickAdd.sourceNodeId, type)
+            } else {
+              addNode(type, { x: quickAdd.flowX - 110, y: quickAdd.flowY - 50 })
+            }
             setQuickAdd(null)
           }}
           onClose={() => setQuickAdd(null)}
@@ -255,7 +276,7 @@ export default function Canvas({ exportRef }) {
   )
 }
 
-function QuickAddMenu({ screenX, screenY, onSelect, onClose }) {
+function QuickAddMenu({ screenX, screenY, sourceNodeId, onSelect, onClose }) {
   const ref = useRef()
   const inputRef = useRef()
   const [search, setSearch] = useState('')
@@ -295,6 +316,12 @@ function QuickAddMenu({ screenX, screenY, onSelect, onClose }) {
       boxShadow: '0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)',
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
     }}>
+      {/* Context label when connecting */}
+      {sourceNodeId && (
+        <div style={{ padding: '7px 12px 0', fontSize: 10, color: 'var(--text-dimmed)', letterSpacing: '0.3px' }}>
+          🔗 Connect to…
+        </div>
+      )}
       {/* Search bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', borderBottom: '1px solid var(--border-subtle)', flexShrink: 0 }}>
         <span style={{ fontSize: 13, color: 'var(--text-dimmed)' }}>🔍</span>
