@@ -1,0 +1,71 @@
+[
+  {
+    "id": "1781429831289",
+    "name": "DNS Lookup",
+    "shell": "powershell",
+    "description": "Resolve a hostname to IPs",
+    "vars": [
+      {
+        "name": "TARGET",
+        "default": "example.com",
+        "hint": "hostname or domain"
+      }
+    ],
+    "body": "$result = Resolve-DnsName -Name $TARGET -ErrorAction SilentlyContinue\nif ($result) {\n  foreach ($r in $result) {\n    if ($r.IPAddress) {\n      $obj = @{ type=\"ip\"; value=$r.IPAddress; note=\"DNS record: $($r.Type) for $TARGET\" }\n      Write-Output ($obj | ConvertTo-Json -Compress)\n    }\n  }\n} else {\n  Write-Output \"Could not resolve $TARGET\"\n}",
+    "createdAt": "2026-06-14T09:37:11.289Z"
+  },
+  {
+    "id": "1781429831292",
+    "name": "Port Scanner",
+    "shell": "powershell",
+    "description": "Check common ports on a target",
+    "vars": [
+      {
+        "name": "TARGET",
+        "default": "127.0.0.1",
+        "hint": "IP or hostname"
+      }
+    ],
+    "body": "$ports = 21,22,23,25,53,80,443,445,3389,8080,8443\nforeach ($port in $ports) {\n  $tcp = New-Object System.Net.Sockets.TcpClient\n  $conn = $tcp.BeginConnect($TARGET, $port, $null, $null)\n  $wait = $conn.AsyncWaitHandle.WaitOne(500, $false)\n  if ($wait -and !$tcp.Client.Connected -eq $false) {\n    try {\n      $tcp.EndConnect($conn)\n      $obj = @{ type=\"ip\"; value=($TARGET + ':' + $port); note=(\"Port $port open on $TARGET\") }\n      Write-Output ($obj | ConvertTo-Json -Compress)\n    } catch {}\n  }\n  $tcp.Close()\n}",
+    "createdAt": "2026-06-14T09:37:11.292Z"
+  },
+  {
+    "id": "1781429831295",
+    "name": "Extract Emails from Text",
+    "shell": "powershell",
+    "description": "Paste raw text, extracts all email addresses",
+    "vars": [
+      {
+        "name": "TEXT",
+        "default": "Paste text here...",
+        "hint": "raw text content"
+      }
+    ],
+    "body": "$text = $TEXT\n$found = [regex]::Matches($text, '[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}')\nforeach ($m in $found) {\n  $obj = @{ type=\"email\"; value=$m.Value; note=\"Extracted from pasted text\" }\n  Write-Output ($obj | ConvertTo-Json -Compress)\n}",
+    "createdAt": "2026-06-14T09:37:11.295Z"
+  },
+  {
+    "id": "1781429831298",
+    "name": "WhoIs Lookup",
+    "shell": "powershell",
+    "description": "Fetch WHOIS data for a domain",
+    "vars": [
+      {
+        "name": "DOMAIN",
+        "default": "example.com",
+        "hint": "domain name"
+      }
+    ],
+    "body": "$result = Invoke-WebRequest -Uri \"https://rdap.org/domain/$DOMAIN\" -UseBasicParsing -ErrorAction SilentlyContinue\nif ($result) {\n  $data = $result.Content | ConvertFrom-Json\n  if ($data.entities) {\n    foreach ($e in $data.entities) {\n      $name = ($e.vcardArray[1] | Where-Object { $_[0] -eq 'fn' })[2]\n      if ($name) {\n        $obj = @{ type=\"person\"; value=$name; note=\"WHOIS contact for $DOMAIN\" }\n        Write-Output ($obj | ConvertTo-Json -Compress)\n      }\n    }\n  }\n  $obj2 = @{ type=\"url\"; value=$DOMAIN; note=\"WHOIS looked up domain\" }\n  Write-Output ($obj2 | ConvertTo-Json -Compress)\n}",
+    "createdAt": "2026-06-14T09:37:11.298Z"
+  },
+  {
+    "id": "1781429859626",
+    "name": "test",
+    "shell": "powershell",
+    "description": "",
+    "vars": [],
+    "body": "echo hello world",
+    "createdAt": "2026-06-14T09:37:39.626Z"
+  }
+]

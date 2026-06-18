@@ -1,0 +1,993 @@
+﻿{
+    "caseInfo":  {
+                     "title":  "Feyza Ataoglu / Durdane Yesilkanat Investigation",
+                     "status":  "active"
+                 },
+    "nodes":  [
+                  {
+                      "id":  "node_1",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  50,
+                                       "y":  50
+                                   },
+                      "data":  {
+                                   "nodeType":  "phone",
+                                   "value":  "+31 6 24203063",
+                                   "confidence":  "confirmed",
+                                   "tags":  "whatsapp",
+                                   "note":  "WhatsApp profile linked to this number",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "+31 6 24203063",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_2",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  50,
+                                       "y":  220
+                                   },
+                      "data":  {
+                                   "nodeType":  "note",
+                                   "value":  "Facebook search (Ataoglu) + 63 matches",
+                                   "confidence":  "confirmed",
+                                   "tags":  "search,facebook",
+                                   "note":  "",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Facebook search (Ataoglu) + 63 matches",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_3",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  720,
+                                       "y":  50
+                                   },
+                      "data":  {
+                                   "nodeType":  "note",
+                                   "value":  "??????63",
+                                   "confidence":  "unverified",
+                                   "tags":  "partial,unknown",
+                                   "note":  "Partial reference â€” possibly phone or account number ending in 63",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "??????63",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_4",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  1060,
+                                       "y":  50
+                                   },
+                      "data":  {
+                                   "nodeType":  "email",
+                                   "value":  "ethem_tanyildiz@icloud.com",
+                                   "confidence":  "confirmed",
+                                   "tags":  "icloud",
+                                   "note":  "iCloud account, linked via password reset chain",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "ethem_tanyildiz@icloud.com",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_5",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  1060,
+                                       "y":  220
+                                   },
+                      "data":  {
+                                   "nodeType":  "document",
+                                   "value":  "Bewijs materiaal slachtoffer",
+                                   "confidence":  "confirmed",
+                                   "tags":  "evidence,victim",
+                                   "note":  "Evidence material from victim",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Bewijs materiaal slachtoffer",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_6",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  400,
+                                       "y":  50
+                                   },
+                      "data":  {
+                                   "nodeType":  "note",
+                                   "value":  "Tikkie ID 001237749256, Game, Van Mw F Ataoglu, NL16ING5069605S542",
+                                   "confidence":  "confirmed",
+                                   "tags":  "tikkie,payment,evidence",
+                                   "note":  "Payment transaction evidence",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Tikkie ID 001237749256, Game, Van Mw F Ataoglu, NL16ING5069605S542",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_7",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  400,
+                                       "y":  220
+                                   },
+                      "data":  {
+                                   "nodeType":  "note",
+                                   "value":  "Password reset iCloud",
+                                   "confidence":  "confirmed",
+                                   "tags":  "icloud,password-reset",
+                                   "note":  "iCloud password reset used â€” confirmation linked to email address",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Password reset iCloud",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_8",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  50,
+                                       "y":  410
+                                   },
+                      "data":  {
+                                   "nodeType":  "social",
+                                   "value":  "https://www.facebook.com/feyza.ataoglu/",
+                                   "confidence":  "confirmed",
+                                   "tags":  "facebook,amsterdam",
+                                   "note":  "Mobiel nummer: 31624203063\nFeyza Ataoglu, vrouw, Amsterdam, Netherlands, Fatsa",
+                                   "sourceUrl":  "https://www.facebook.com/feyza.ataoglu/",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "https://www.facebook.com/feyza.ataoglu/",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_9",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  400,
+                                       "y":  410
+                                   },
+                      "data":  {
+                                   "nodeType":  "image",
+                                   "value":  "iCloud bevestiging screenshot",
+                                   "confidence":  "confirmed",
+                                   "tags":  "screenshot,icloud,evidence",
+                                   "note":  "iCloud bevestiging gekoppeld aan email adres",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "iCloud bevestiging screenshot",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_10",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  1060,
+                                       "y":  410
+                                   },
+                      "data":  {
+                                   "nodeType":  "image",
+                                   "value":  "Foto bewijs - persoon",
+                                   "confidence":  "probable",
+                                   "tags":  "photo,evidence",
+                                   "note":  "Photo matched with other evidence",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Foto bewijs - persoon",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_11",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  1060,
+                                       "y":  600
+                                   },
+                      "data":  {
+                                   "nodeType":  "image",
+                                   "value":  "Groepsfoto - selfie",
+                                   "confidence":  "probable",
+                                   "tags":  "photo,evidence",
+                                   "note":  "Group selfie, matched with other photos",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Groepsfoto - selfie",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_12",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  50,
+                                       "y":  600
+                                   },
+                      "data":  {
+                                   "nodeType":  "person",
+                                   "value":  "Yesil",
+                                   "confidence":  "probable",
+                                   "tags":  "",
+                                   "note":  "Connected to Facebook profile",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Yesil",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_13",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  50,
+                                       "y":  740
+                                   },
+                      "data":  {
+                                   "nodeType":  "phone",
+                                   "value":  "+31624203063",
+                                   "confidence":  "confirmed",
+                                   "tags":  "facebook",
+                                   "note":  "Found on Facebook profile",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "+31624203063",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_14",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  50,
+                                       "y":  900
+                                   },
+                      "data":  {
+                                   "nodeType":  "note",
+                                   "value":  "Odido profiel",
+                                   "confidence":  "confirmed",
+                                   "tags":  "odido",
+                                   "note":  "Odido profile found via phone number search",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Odido profiel",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_15",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  400,
+                                       "y":  790
+                                   },
+                      "data":  {
+                                   "nodeType":  "image",
+                                   "value":  "Microsoft Outlook wachtwoord reset screenshot",
+                                   "confidence":  "confirmed",
+                                   "tags":  "screenshot,microsoft,outlook",
+                                   "note":  "Op een andere manier aanmelden â€” toont herstel opties",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Microsoft Outlook wachtwoord reset screenshot",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_16",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  400,
+                                       "y":  600
+                                   },
+                      "data":  {
+                                   "nodeType":  "note",
+                                   "value":  "Password reset Outlook",
+                                   "confidence":  "confirmed",
+                                   "tags":  "outlook,password-reset,microsoft",
+                                   "note":  "",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Password reset Outlook",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_17",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  50,
+                                       "y":  1060
+                                   },
+                      "data":  {
+                                   "nodeType":  "email",
+                                   "value":  "durdane_1998@hotmail.com",
+                                   "confidence":  "confirmed",
+                                   "tags":  "hotmail,odido",
+                                   "note":  "Found via Odido profile",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "durdane_1998@hotmail.com",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_18",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  400,
+                                       "y":  980
+                                   },
+                      "data":  {
+                                   "nodeType":  "phone",
+                                   "value":  "+???????45",
+                                   "confidence":  "unverified",
+                                   "tags":  "partial,outlook",
+                                   "note":  "Partially redacted phone from Outlook password reset options",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "+???????45",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_19",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  400,
+                                       "y":  1140
+                                   },
+                      "data":  {
+                                   "nodeType":  "email",
+                                   "value":  "???@bswereldburger.nl",
+                                   "confidence":  "unverified",
+                                   "tags":  "partial,school,bswereldburger",
+                                   "note":  "Partially redacted school email from Outlook password reset â€” domain points to school",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "???@bswereldburger.nl",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_20",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  50,
+                                       "y":  1230
+                                   },
+                      "data":  {
+                                   "nodeType":  "note",
+                                   "value":  "Odido search",
+                                   "confidence":  "confirmed",
+                                   "tags":  "odido",
+                                   "note":  "",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Odido search",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_21",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  720,
+                                       "y":  980
+                                   },
+                      "data":  {
+                                   "nodeType":  "url",
+                                   "value":  "https://bswereldburger.nl",
+                                   "confidence":  "confirmed",
+                                   "tags":  "school",
+                                   "note":  "School website, matched with photo and email domain",
+                                   "sourceUrl":  "https://bswereldburger.nl",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "https://bswereldburger.nl",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_22",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  720,
+                                       "y":  790
+                                   },
+                      "data":  {
+                                   "nodeType":  "image",
+                                   "value":  "WhatsApp contact - +31 6 38294045",
+                                   "confidence":  "confirmed",
+                                   "tags":  "whatsapp,screenshot",
+                                   "note":  "WhatsApp contact card showing +31 6 38294045",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "WhatsApp contact - +31 6 38294045",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_23",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  50,
+                                       "y":  1400
+                                   },
+                      "data":  {
+                                   "nodeType":  "note",
+                                   "value":  "Odido match",
+                                   "confidence":  "confirmed",
+                                   "tags":  "odido",
+                                   "note":  "Odido profile matched on year of birth",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Odido match",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_24",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  380,
+                                       "y":  1280
+                                   },
+                      "data":  {
+                                   "nodeType":  "event",
+                                   "value":  "1998-01-15",
+                                   "confidence":  "confirmed",
+                                   "tags":  "dob,odido",
+                                   "note":  "Date of birth matched via Odido",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "1998-01-15",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_25",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  380,
+                                       "y":  1440
+                                   },
+                      "data":  {
+                                   "nodeType":  "phone",
+                                   "value":  "+31638294045",
+                                   "confidence":  "confirmed",
+                                   "tags":  "odido,whatsapp",
+                                   "note":  "From Odido match, confirmed via WhatsApp search",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "+31638294045",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_26",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  1060,
+                                       "y":  980
+                                   },
+                      "data":  {
+                                   "nodeType":  "note",
+                                   "value":  "ContactOut - LinkedIn werkgeschiedenis",
+                                   "confidence":  "confirmed",
+                                   "tags":  "contactout,linkedin",
+                                   "note":  "Leerkracht Basisonderwijs bij Durdane ZZP\nLeraar M Basisonderwijs at Basisschool de Wereldburger (aug 2022 â€“ dec 2022)\nLeraar M Basisonderwijs at Basisschool de Wereldburger (jul 2020 â€“ aug 2022)\nPakhuismedewerker at Hogeschool van Amsterdam (sep 2019 â€“ aug 2020)\nLeraar M Basisonderwijs at Dodepijpe Montessorieschool (mei 2020 â€“ jul 2022)\nStagiaire at Dodepijpe Montessorieschool (aug 2019 â€“ jun 2020)\nStagiaire at De 7e Montessorieschool (jan 2019 â€“ jun 2019)\nStagiaire at De Bloemenveenschool (sep 2018 â€“ jan 2019)\nStagiaire at De Gaanei Burgerschool (sep 2017 â€“ jun 2017)",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "ContactOut - LinkedIn werkgeschiedenis",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_27",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  380,
+                                       "y":  1600
+                                   },
+                      "data":  {
+                                   "nodeType":  "person",
+                                   "value":  "Durdana",
+                                   "confidence":  "confirmed",
+                                   "tags":  "first-name",
+                                   "note":  "First name from Odido match",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Durdana",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_28",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  720,
+                                       "y":  1600
+                                   },
+                      "data":  {
+                                   "nodeType":  "social",
+                                   "value":  "https://linkedin.com/in/durdane-yesilkanat",
+                                   "confidence":  "confirmed",
+                                   "tags":  "linkedin,teacher,amsterdam",
+                                   "note":  "Durdane Yesilkanat â€” Leerkracht Basisonderwijs bij Durdane ZZP, Amsterdam",
+                                   "sourceUrl":  "https://linkedin.com/in/durdane-yesilkanat",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "https://linkedin.com/in/durdane-yesilkanat",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  },
+                  {
+                      "id":  "node_29",
+                      "type":  "osint",
+                      "position":  {
+                                       "x":  380,
+                                       "y":  1760
+                                   },
+                      "data":  {
+                                   "nodeType":  "person",
+                                   "value":  "Kanat",
+                                   "confidence":  "confirmed",
+                                   "tags":  "last-name",
+                                   "note":  "Last name from Odido match â€” full name: Durdane Yesilkanat",
+                                   "sourceUrl":  "",
+                                   "dateAdded":  "2026-06-14",
+                                   "collapsed":  false,
+                                   "label":  "Kanat",
+                                   "locked":  false,
+                                   "imageUrl":  ""
+                               }
+                  }
+              ],
+    "edges":  [
+                  {
+                      "id":  "e1",
+                      "source":  "node_1",
+                      "target":  "node_2",
+                      "label":  "WhatsApp profiel gelinkt aan nummer",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "WhatsApp profiel gelinkt aan nummer",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e2",
+                      "source":  "node_2",
+                      "target":  "node_8",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e3",
+                      "source":  "node_8",
+                      "target":  "node_12",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e4",
+                      "source":  "node_8",
+                      "target":  "node_13",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e5",
+                      "source":  "node_8",
+                      "target":  "node_7",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e6",
+                      "source":  "node_6",
+                      "target":  "node_7",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e7",
+                      "source":  "node_7",
+                      "target":  "node_9",
+                      "label":  "bevestiging iCloud gekoppeld aan email adres",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "bevestiging iCloud gekoppeld aan email adres",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e8",
+                      "source":  "node_7",
+                      "target":  "node_3",
+                      "label":  "gebruikt",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "gebruikt",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e9",
+                      "source":  "node_3",
+                      "target":  "node_4",
+                      "label":  "password reset iCloud",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "password reset iCloud",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e10",
+                      "source":  "node_5",
+                      "target":  "node_10",
+                      "label":  "screenshot",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "screenshot",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e11",
+                      "source":  "node_10",
+                      "target":  "node_11",
+                      "label":  "matched",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "matched",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e12",
+                      "source":  "node_13",
+                      "target":  "node_14",
+                      "label":  "search Odido",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "search Odido",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e13",
+                      "source":  "node_14",
+                      "target":  "node_17",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e14",
+                      "source":  "node_17",
+                      "target":  "node_20",
+                      "label":  "gebruikt",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "gebruikt",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e15",
+                      "source":  "node_17",
+                      "target":  "node_16",
+                      "label":  "gebruikt",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "gebruikt",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e16",
+                      "source":  "node_20",
+                      "target":  "node_23",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e17",
+                      "source":  "node_23",
+                      "target":  "node_24",
+                      "label":  "matched met jaar",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "matched met jaar",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e18",
+                      "source":  "node_23",
+                      "target":  "node_25",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e19",
+                      "source":  "node_23",
+                      "target":  "node_27",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e20",
+                      "source":  "node_23",
+                      "target":  "node_17",
+                      "label":  "matched",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "matched",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e21",
+                      "source":  "node_23",
+                      "target":  "node_29",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e22",
+                      "source":  "node_16",
+                      "target":  "node_15",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e23",
+                      "source":  "node_16",
+                      "target":  "node_18",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e24",
+                      "source":  "node_16",
+                      "target":  "node_19",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e25",
+                      "source":  "node_25",
+                      "target":  "node_22",
+                      "label":  "WhatsApp search",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "WhatsApp search",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e26",
+                      "source":  "node_22",
+                      "target":  "node_27",
+                      "label":  "foto matches",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "foto matches",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e27",
+                      "source":  "node_22",
+                      "target":  "node_21",
+                      "label":  "foto",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "foto",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e28",
+                      "source":  "node_21",
+                      "target":  "node_26",
+                      "label":  "matched",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "matched",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e29",
+                      "source":  "node_26",
+                      "target":  "node_28",
+                      "label":  "matched job profil",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "matched job profil",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e30",
+                      "source":  "node_18",
+                      "target":  "node_25",
+                      "label":  "matches",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "matches",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e31",
+                      "source":  "node_19",
+                      "target":  "node_21",
+                      "label":  "matched",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "matched",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e32",
+                      "source":  "node_10",
+                      "target":  "node_22",
+                      "label":  "matched",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "matched",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e33",
+                      "source":  "node_28",
+                      "target":  "node_26",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  },
+                  {
+                      "id":  "e34",
+                      "source":  "node_27",
+                      "target":  "node_28",
+                      "label":  "",
+                      "type":  "osint",
+                      "data":  {
+                                   "label":  "",
+                                   "relationshipType":  "default"
+                               }
+                  }
+              ]
+}

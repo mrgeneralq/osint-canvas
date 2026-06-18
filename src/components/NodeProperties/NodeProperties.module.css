@@ -1,0 +1,152 @@
+.panel {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+}
+
+.emptyIcon { font-size: 32px; opacity: 0.3; }
+.empty p { font-size: 12px; color: var(--text-dimmed); line-height: 1.5; }
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.panelIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.panelTitle { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.panelId { font-size: 10px; color: var(--text-dimmed); margin-top: 1px; }
+
+.closeBtn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 11px;
+  border-radius: 4px;
+  padding: 3px 5px;
+}
+.closeBtn:hover { background: var(--bg-elevated); color: var(--text-primary); }
+
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 12px;
+}
+.scroll::-webkit-scrollbar { width: 4px; }
+.scroll::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 4px; }
+
+.input {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: inherit;
+  padding: 6px 8px;
+  outline: none;
+  resize: none;
+  transition: border-color 0.12s;
+}
+.input:focus { border-color: var(--accent); }
+.input::placeholder { color: var(--text-muted); }
+
+.confidenceGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.confBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 9px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: inherit;
+  text-align: left;
+  transition: all 0.12s;
+}
+.confBtn:hover { border-color: var(--lvl-color); color: var(--text-primary); }
+.confActive {
+  border-color: var(--lvl-color) !important;
+  background: color-mix(in srgb, var(--lvl-color) 12%, var(--bg-elevated)) !important;
+  color: var(--text-primary) !important;
+}
+
+.confDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dorkBtn {
+  width: 100%; padding: 8px;
+  background: linear-gradient(135deg, rgba(124,140,248,0.1), rgba(124,140,248,0.05));
+  border: 1px solid rgba(124,140,248,0.35);
+  border-radius: 7px; color: var(--accent);
+  font-size: 12px; font-weight: 600;
+  font-family: inherit; cursor: pointer;
+  margin-bottom: 8px;
+  transition: all 0.12s;
+}
+.dorkBtn:hover { background: rgba(124,140,248,0.18); border-color: var(--accent); }
+
+.actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.actionBtn {
+  flex: 1;
+  padding: 7px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-mid);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.actionBtn:hover { background: var(--bg-hover); border-color: var(--accent); color: #fff; }
+.danger:hover { background: var(--danger-bg) !important; border-color: var(--danger) !important; color: var(--danger) !important; }

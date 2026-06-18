@@ -1,0 +1,71 @@
+.menu {
+  position: fixed;
+  z-index: 3000;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-mid);
+  border-radius: 9px;
+  padding: 5px;
+  min-width: 200px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+  animation: pop 0.1s ease;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.sep { height: 1px; background: var(--border-subtle); margin: 3px 0; }
+
+.groupLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dimmed);
+  padding: 4px 10px 2px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s, color 0.1s;
+}
+.item:hover { background: var(--bg-hover); color: var(--text-primary); }
+.danger { color: var(--danger) !important; }
+.danger:hover { background: var(--danger-bg) !important; }
+.active { color: var(--accent) !important; background: rgba(124,140,248,0.08); }
+
+.itemIcon {
+  width: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}

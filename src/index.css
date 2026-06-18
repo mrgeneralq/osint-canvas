@@ -1,0 +1,46 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-base:       #0f1117;
+  --bg-surface:    #141720;
+  --bg-elevated:   #1e2235;
+  --bg-hover:      #252840;
+  --border-subtle: #2d3148;
+  --border-mid:    #3a3f6b;
+  --border-strong: #5a6290;
+  --accent:        #7c8cf8;
+  --accent-light:  #a5b0ff;
+  --text-primary:  #e2e8f0;
+  --text-secondary:#c4cbf5;
+  --text-muted:    #6b7280;
+  --text-dimmed:   #4b5280;
+  --danger:        #f87171;
+  --danger-bg:     #3d1515;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+}
+
+/* React Flow overrides */
+.react-flow__pane { cursor: grab; }
+.react-flow__pane:active { cursor: grabbing; }
+.react-flow__edge-path { stroke: var(--border-strong); stroke-width: 1.8; }
+.react-flow__edge.selected .react-flow__edge-path { stroke: var(--accent); stroke-width: 2.5; }
+.react-flow__arrowhead polyline { stroke: var(--border-strong) !important; fill: var(--border-strong) !important; }
+.react-flow__edge.selected .react-flow__arrowhead polyline { stroke: var(--accent) !important; fill: var(--accent) !important; }
+.react-flow__connection-path { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 6 3; }
+.react-flow__handle { border-color: var(--border-strong) !important; background: var(--bg-elevated) !important; }
+.react-flow__handle:hover { background: var(--accent) !important; border-color: var(--accent-light) !important; }
+.react-flow__minimap { border: 1px solid var(--border-subtle); border-radius: 8px; overflow: hidden; }
+.react-flow__controls { border: 1px solid var(--border-subtle); border-radius: 8px; overflow: hidden; }
+.react-flow__controls-button { background: var(--bg-surface); border-bottom-color: var(--border-subtle) !important; color: var(--text-secondary); }
+.react-flow__controls-button:hover { background: var(--bg-hover); }
+.react-flow__controls-button svg { fill: var(--text-secondary); }
+.react-flow__background { background: var(--bg-base); }
