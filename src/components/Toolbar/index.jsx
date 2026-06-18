@@ -12,10 +12,10 @@ import AiPromptModal from '../AiPromptModal'
 import SourcesModal from '../SourcesModal'
 import styles from './Toolbar.module.css'
 
-export default function Toolbar({ onExportPng, canvasRef, onTogglePalette, onToggleProps, paletteOpen, propsOpen }) {
+export default function Toolbar({ onExportPng, canvasRef, onToggleProps, propsOpen }) {
   const fileRef = useRef()
   const moreRef = useRef()
-  const { exportJSON, importJSON, clearAll, searchTerm, setSearchTerm, caseInfo, undo, redo } = useStore()
+  const { exportJSON, importJSON, clearAll, searchTerm, setSearchTerm, caseInfo, undo, redo, saveCase } = useStore()
   const canUndo = useStore((s) => s.historyIndex > 0)
   const canRedo = useStore((s) => s.historyIndex < s.history.length - 1)
 
@@ -38,11 +38,12 @@ export default function Toolbar({ onExportPng, canvasRef, onTogglePalette, onTog
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  // Keyboard shortcut for ?
+  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
       if (e.key === '?') setShowShortcuts(true)
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveCase() }
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
@@ -76,10 +77,7 @@ export default function Toolbar({ onExportPng, canvasRef, onTogglePalette, onTog
         <span className={styles.logo}>🔍 OSINT</span>
         <div className={styles.sep} />
 
-        {/* Panel toggles */}
-        <button className={`${styles.iconBtn} ${paletteOpen ? styles.active : ''}`} onClick={onTogglePalette} title="Toggle node palette">
-          <PanelLeftIcon />
-        </button>
+        {/* Panel toggle */}
         <button className={`${styles.iconBtn} ${propsOpen ? styles.active : ''}`} onClick={onToggleProps} title="Toggle properties panel">
           <PanelRightIcon />
         </button>
@@ -132,8 +130,11 @@ export default function Toolbar({ onExportPng, canvasRef, onTogglePalette, onTog
         <button className={styles.btn} onClick={onExportPng} title="Export high-quality PNG">
           🖼 PNG
         </button>
-        <button className={styles.btn} onClick={exportJSON} title="Export case as JSON">
+        <button className={styles.btn} onClick={saveCase} title="Save case to server (Ctrl+S)">
           💾 Save
+        </button>
+        <button className={styles.btn} onClick={exportJSON} title="Export canvas as JSON file">
+          ⬇ Export
         </button>
 
         {/* More dropdown */}

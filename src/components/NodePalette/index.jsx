@@ -4,7 +4,7 @@ import { NODE_TYPE_CONFIG, PALETTE_GROUPS } from '../../config/nodeTypes'
 import useStore from '../../store/useStore'
 import styles from './NodePalette.module.css'
 
-export default function NodePalette() {
+export default function NodePalette({ embedded = false }) {
   const [search, setSearch] = useState('')
   const [collapsed, setCollapsed] = useState({})
   const addNode = useStore((s) => s.addNode)
