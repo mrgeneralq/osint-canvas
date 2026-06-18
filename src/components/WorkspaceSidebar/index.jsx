@@ -1,9 +1,55 @@
 import { useState, useRef } from 'react'
+import { useReactFlow } from '@xyflow/react'
 import useStore from '../../store/useStore'
-import NodePalette from '../NodePalette'
+import { NODE_TYPE_CONFIG, PALETTE_GROUPS } from '../../config/nodeTypes'
 import styles from './WorkspaceSidebar.module.css'
 
 const STATUS_COLORS = { Active: '#4ade80', Pending: '#facc15', Cold: '#60a5fa', Closed: '#6b7280' }
+
+function NodeGrid() {
+  const addNode = useStore((s) => s.addNode)
+  const { getViewport } = useReactFlow()
+
+  const onDragStart = (e, type) => {
+    e.dataTransfer.setData('application/osint-node-type', type)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleClick = (type) => {
+    const vp = getViewport()
+    const cx = (window.innerWidth / 2 - vp.x) / vp.zoom
+    const cy = (window.innerHeight / 2 - vp.y) / vp.zoom
+    addNode(type, { x: cx - 110, y: cy - 50 })
+  }
+
+  return (
+    <div className={styles.nodeGrid}>
+      {PALETTE_GROUPS.map((group) => {
+        const items = Object.entries(NODE_TYPE_CONFIG).filter(([, cfg]) => cfg.group === group)
+        return (
+          <div key={group} className={styles.nodeGroup}>
+            <span className={styles.nodeGroupLabel}>{group}</span>
+            <div className={styles.nodeTiles}>
+              {items.map(([type, cfg]) => (
+                <div
+                  key={type}
+                  className={styles.nodeTile}
+                  style={{ '--tile-bg': cfg.color, '--tile-border': cfg.border }}
+                  draggable
+                  onDragStart={(e) => onDragStart(e, type)}
+                  onClick={() => handleClick(type)}
+                  title={cfg.label}
+                >
+                  <span className={styles.nodeTileIcon}>{cfg.icon}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 export default function WorkspaceSidebar() {
   const caseInfo = useStore((s) => s.caseInfo)
@@ -23,7 +69,6 @@ export default function WorkspaceSidebar() {
 
   const [canvasesOpen, setCanvasesOpen] = useState(true)
   const [notesOpen, setNotesOpen] = useState(true)
-  const [paletteOpen, setPaletteOpen] = useState(false)
   const [renamingId, setRenamingId] = useState(null)
   const [renameValue, setRenameValue] = useState('')
   const renameRef = useRef()
@@ -53,17 +98,19 @@ export default function WorkspaceSidebar() {
         </div>
       </div>
 
+      {/* Node type grid — top of sidebar */}
+      <NodeGrid />
+
+      <div className={styles.divider} />
+
+      {/* File sections */}
       <div className={styles.sections}>
         {/* Canvases */}
         <div className={styles.section}>
           <button className={styles.sectionHeader} onClick={() => setCanvasesOpen((v) => !v)}>
             <span className={styles.sectionIcon}>{canvasesOpen ? '▾' : '▸'}</span>
             <span className={styles.sectionLabel}>Canvases</span>
-            <span
-              className={styles.addBtn}
-              onClick={(e) => { e.stopPropagation(); addCanvas() }}
-              title="New canvas"
-            >+</span>
+            <span className={styles.addBtn} onClick={(e) => { e.stopPropagation(); addCanvas() }} title="New canvas">+</span>
           </button>
           {canvasesOpen && (
             <div className={styles.items}>
@@ -102,17 +149,11 @@ export default function WorkspaceSidebar() {
           <button className={styles.sectionHeader} onClick={() => setNotesOpen((v) => !v)}>
             <span className={styles.sectionIcon}>{notesOpen ? '▾' : '▸'}</span>
             <span className={styles.sectionLabel}>Notes</span>
-            <span
-              className={styles.addBtn}
-              onClick={(e) => { e.stopPropagation(); createNote() }}
-              title="New note"
-            >+</span>
+            <span className={styles.addBtn} onClick={(e) => { e.stopPropagation(); createNote() }} title="New note">+</span>
           </button>
           {notesOpen && (
             <div className={styles.items}>
-              {notes.length === 0 && (
-                <p className={styles.emptyHint}>No notes yet</p>
-              )}
+              {notes.length === 0 && <p className={styles.emptyHint}>No notes yet</p>}
               {notes.map((n) => (
                 <div
                   key={n.id}
@@ -126,19 +167,6 @@ export default function WorkspaceSidebar() {
                   </div>
                 </div>
               ))}
-            </div>
-          )}
-        </div>
-
-        {/* Node Palette */}
-        <div className={styles.section}>
-          <button className={styles.sectionHeader} onClick={() => setPaletteOpen((v) => !v)}>
-            <span className={styles.sectionIcon}>{paletteOpen ? '▾' : '▸'}</span>
-            <span className={styles.sectionLabel}>Node Types</span>
-          </button>
-          {paletteOpen && (
-            <div className={styles.paletteWrap}>
-              <NodePalette embedded />
             </div>
           )}
         </div>

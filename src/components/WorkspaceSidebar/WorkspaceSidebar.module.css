@@ -42,6 +42,72 @@
 }
 .caseStatus { font-size: 10px; }
 
+/* ── node grid ──────────────────────────────────────────────────────────────── */
+.nodeGrid {
+  flex-shrink: 0;
+  padding: 10px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nodeGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nodeGroupLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-dimmed);
+}
+
+.nodeTiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.nodeTile {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--tile-bg, var(--bg-elevated));
+  border: 1px solid var(--tile-border, var(--border-subtle));
+  border-radius: 7px;
+  cursor: grab;
+  transition: transform 0.1s, border-color 0.12s, box-shadow 0.12s;
+  user-select: none;
+  position: relative;
+}
+.nodeTile:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 1;
+}
+.nodeTile:active { cursor: grabbing; transform: scale(0.92); }
+
+.nodeTileIcon {
+  font-size: 16px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ── divider ────────────────────────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--border-subtle);
+  flex-shrink: 0;
+  margin: 0 10px;
+}
+
+/* ── file sections ──────────────────────────────────────────────────────────── */
 .sections { flex: 1; overflow-y: auto; }
 .sections::-webkit-scrollbar { width: 3px; }
 .sections::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 4px; }
@@ -92,11 +158,7 @@
 .itemIcon { font-size: 12px; flex-shrink: 0; }
 .itemName { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.itemActions {
-  display: none;
-  gap: 2px;
-  flex-shrink: 0;
-}
+.itemActions { display: none; gap: 2px; flex-shrink: 0; }
 .item:hover .itemActions { display: flex; }
 
 .actionBtn {
@@ -125,5 +187,3 @@
 }
 
 .emptyHint { font-size: 11px; color: var(--text-dimmed); padding: 4px 8px 6px; margin: 0; }
-
-.paletteWrap { max-height: 400px; overflow-y: auto; }
