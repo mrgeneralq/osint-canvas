@@ -13,11 +13,18 @@
   min-height: 0;
 }
 
+.center {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  overflow: hidden;
+}
+
 .panel {
   flex-shrink: 0;
   overflow: hidden;
   transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.panelOpen  { width: 190px; }
+.panelOpen  { width: 260px; }
 .panelClosed { width: 0 !important; }

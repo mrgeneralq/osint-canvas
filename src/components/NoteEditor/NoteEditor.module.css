@@ -1,0 +1,117 @@
+.editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-base);
+  height: 100%;
+}
+
+.empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dimmed);
+  font-size: 13px;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  background: var(--bg-surface);
+}
+
+.titleInput {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  outline: none;
+  font-family: inherit;
+  padding: 0;
+}
+.titleInput::placeholder { color: var(--text-dimmed); }
+
+.modeBtns { display: flex; gap: 2px; }
+.modeBtn {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 5px;
+  color: var(--text-dimmed);
+  font-size: 11px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.modeBtn:hover { border-color: var(--border-mid); color: var(--text-secondary); }
+.modeBtnActive { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.body_edit .textarea { flex: 1; }
+.body_edit .preview { display: none; }
+
+.body_preview .textarea { display: none; }
+.body_preview .preview { flex: 1; }
+
+.body_split .textarea,
+.body_split .preview { flex: 1; }
+
+.textarea {
+  background: var(--bg-base);
+  border: none;
+  border-right: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  padding: 20px 24px;
+  resize: none;
+  outline: none;
+  overflow-y: auto;
+}
+.textarea::-webkit-scrollbar { width: 4px; }
+.textarea::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 4px; }
+
+.preview {
+  padding: 20px 28px;
+  overflow-y: auto;
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.75;
+}
+.preview::-webkit-scrollbar { width: 4px; }
+.preview::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 4px; }
+
+/* markdown styles */
+.preview :global(h1) { font-size: 22px; font-weight: 700; margin: 0 0 12px; color: var(--text-primary); }
+.preview :global(h2) { font-size: 17px; font-weight: 600; margin: 20px 0 8px; color: var(--text-primary); border-bottom: 1px solid var(--border-subtle); padding-bottom: 6px; }
+.preview :global(h3) { font-size: 14px; font-weight: 600; margin: 16px 0 6px; color: var(--text-secondary); }
+.preview :global(p) { margin: 0 0 10px; }
+.preview :global(strong) { color: var(--text-primary); font-weight: 600; }
+.preview :global(em) { color: var(--text-secondary); }
+.preview :global(code) { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 4px; padding: 1px 5px; font-family: monospace; font-size: 12px; color: #a78bfa; }
+.preview :global(pre) { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 7px; padding: 14px 16px; overflow-x: auto; margin: 0 0 12px; }
+.preview :global(pre code) { background: none; border: none; padding: 0; color: var(--text-primary); }
+.preview :global(blockquote) { border-left: 3px solid var(--accent); padding-left: 14px; color: var(--text-dimmed); margin: 0 0 12px; }
+.preview :global(ul), .preview :global(ol) { padding-left: 20px; margin: 0 0 10px; }
+.preview :global(li) { margin-bottom: 3px; }
+.preview :global(a) { color: var(--accent); text-decoration: none; }
+.preview :global(a:hover) { text-decoration: underline; }
+.preview :global(hr) { border: none; border-top: 1px solid var(--border-subtle); margin: 16px 0; }
+.preview :global(table) { border-collapse: collapse; width: 100%; margin-bottom: 12px; font-size: 13px; }
+.preview :global(th), .preview :global(td) { border: 1px solid var(--border-subtle); padding: 6px 10px; text-align: left; }
+.preview :global(th) { background: var(--bg-elevated); color: var(--text-secondary); font-weight: 600; }
+.preview :global(.placeholder) { color: var(--text-dimmed); font-style: italic; }
