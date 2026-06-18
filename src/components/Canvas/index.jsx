@@ -12,7 +12,7 @@ import OsintNode from '../nodes/OsintNode'
 import OsintEdge from '../nodes/OsintEdge'
 import ContextMenu from '../ContextMenu'
 import { NODE_TYPE_CONFIG, PALETTE_GROUPS } from '../../config/nodeTypes'
-import { EDGE_RELATIONSHIP_TYPES, EDGE_REL_GROUPS, EDGE_CONFIDENCE } from '../../config/edgeTypes'
+import { EDGE_RELATIONSHIP_TYPES, EDGE_REL_GROUPS, EDGE_CONFIDENCE, suggestedRelationships } from '../../config/edgeTypes'
 import { applyDagreLayout } from '../../utils/autoLayout'
 import styles from './Canvas.module.css'
 
@@ -433,15 +433,24 @@ const DIR_ICONS = { 'one-way': '→', 'bidirectional': '↔', 'none': '—' }
 
 function EdgePickerMenu({ screenX, screenY, edgeId, onClose }) {
   const ref = useRef()
+  const customRef = useRef()
+  const [showAll, setShowAll] = useState(false)
+  const [customLabel, setCustomLabel] = useState('')
   const edges = useStore((s) => s.edges)
+  const nodes = useStore((s) => s.nodes)
   const updateEdgeData = useStore((s) => s.updateEdgeData)
   const deleteEdge = useStore((s) => s.deleteEdge)
   const setSelectedEdgeId = useStore((s) => s.setSelectedEdgeId)
 
   const edge = edges.find((e) => e.id === edgeId)
+  const srcNode = nodes.find((n) => n.id === edge?.source)
+  const tgtNode = nodes.find((n) => n.id === edge?.target)
   const currentType = edge?.data?.relationshipType ?? 'default'
   const currentConf = edge?.data?.confidence ?? 'probable'
   const currentDir = edge?.data?.direction ?? (EDGE_RELATIONSHIP_TYPES[currentType]?.bidirectional ? 'bidirectional' : 'one-way')
+
+  const suggestions = suggestedRelationships(srcNode?.data?.nodeType, tgtNode?.data?.nodeType)
+  const hasSuggestions = suggestions && suggestions.length > 0
 
   useEffect(() => {
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose() }
@@ -450,14 +459,47 @@ function EdgePickerMenu({ screenX, screenY, edgeId, onClose }) {
   }, [onClose])
 
   const W = 260
-  const H = 420
   const left = Math.min(screenX + 12, window.innerWidth - W - 12)
-  const top  = Math.min(screenY - 20, window.innerHeight - H - 12)
+  const top  = Math.min(screenY - 20, window.innerHeight - 520)
 
   if (!edge) return null
 
   const nextConf = CONF_ORDER[(CONF_ORDER.indexOf(currentConf) + 1) % CONF_ORDER.length]
   const nextDir  = DIR_CYCLE[currentDir]
+
+  const applyType = (key) => {
+    updateEdgeData(edgeId, { relationshipType: key, label: '' })
+    onClose()
+  }
+
+  const applyCustom = () => {
+    const val = customLabel.trim()
+    if (!val) return
+    updateEdgeData(edgeId, { label: val, relationshipType: 'default' })
+    onClose()
+  }
+
+  const TypeChip = ({ typeKey }) => {
+    const cfg = EDGE_RELATIONSHIP_TYPES[typeKey]
+    if (!cfg) return null
+    const active = currentType === typeKey && !edge.data?.label
+    return (
+      <button onClick={() => applyType(typeKey)} style={{
+        background: active ? cfg.color : 'var(--bg-elevated)',
+        color: active ? '#fff' : 'var(--text-secondary)',
+        border: `1px solid ${active ? cfg.color : 'var(--border-subtle)'}`,
+        borderRadius: 10, padding: '4px 10px', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
+        fontWeight: active ? 600 : 400,
+        display: 'flex', alignItems: 'center', gap: 5,
+      }}
+        onMouseEnter={(e) => { if (!active) { e.currentTarget.style.borderColor = cfg.color; e.currentTarget.style.color = cfg.color } }}
+        onMouseLeave={(e) => { if (!active) { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.color = 'var(--text-secondary)' } }}
+      >
+        {cfg.dash && <span style={{ fontSize: 8, opacity: 0.6 }}>╌</span>}
+        {cfg.label}
+      </button>
+    )
+  }
 
   return (
     <div ref={ref} style={{
@@ -472,7 +514,6 @@ function EdgePickerMenu({ screenX, screenY, edgeId, onClose }) {
       {/* Header */}
       <div style={{ padding: '9px 12px 7px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{ flex: 1, fontSize: 10, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--text-dimmed)' }}>Relationship</span>
-        {/* Confidence pill */}
         <button onClick={() => updateEdgeData(edgeId, { confidence: nextConf })} style={{
           background: 'none', border: `1px solid ${CONF_COLORS[currentConf]}`,
           color: CONF_COLORS[currentConf], borderRadius: 4, padding: '2px 7px',
@@ -480,7 +521,6 @@ function EdgePickerMenu({ screenX, screenY, edgeId, onClose }) {
         }} title={`Confidence: ${currentConf} — click to cycle`}>
           {EDGE_CONFIDENCE[currentConf]?.label}
         </button>
-        {/* Direction pill */}
         <button onClick={() => updateEdgeData(edgeId, { direction: nextDir })} style={{
           background: 'none', border: '1px solid var(--border-mid)',
           color: 'var(--text-secondary)', borderRadius: 4, padding: '2px 7px',
@@ -490,42 +530,69 @@ function EdgePickerMenu({ screenX, screenY, edgeId, onClose }) {
         </button>
       </div>
 
-      {/* Type groups */}
-      <div style={{ overflowY: 'auto', maxHeight: H - 90, padding: '6px 8px 4px' }}>
-        {EDGE_REL_GROUPS.map((group) => {
-          const entries = Object.entries(EDGE_RELATIONSHIP_TYPES).filter(([, cfg]) => cfg.group === group)
-          return (
-            <div key={group} style={{ marginBottom: 6 }}>
-              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-dimmed)', padding: '4px 4px 3px' }}>{group}</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                {entries.map(([key, cfg]) => {
-                  const active = currentType === key
-                  return (
-                    <button key={key} onClick={() => { updateEdgeData(edgeId, { relationshipType: key }); onClose() }}
-                      style={{
-                        background: active ? cfg.color : 'var(--bg-elevated)',
-                        color: active ? '#fff' : 'var(--text-secondary)',
-                        border: `1px solid ${active ? cfg.color : 'var(--border-subtle)'}`,
-                        borderRadius: 10, padding: '4px 10px', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
-                        fontWeight: active ? 600 : 400,
-                        display: 'flex', alignItems: 'center', gap: 5,
-                      }}
-                      onMouseEnter={(e) => { if (!active) { e.currentTarget.style.borderColor = cfg.color; e.currentTarget.style.color = cfg.color } }}
-                      onMouseLeave={(e) => { if (!active) { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.color = 'var(--text-secondary)' } }}
-                    >
-                      {cfg.dash && <span style={{ fontSize: 8, opacity: 0.6 }}>╌</span>}
-                      {cfg.label}
-                    </button>
-                  )
-                })}
-              </div>
+      <div style={{ overflowY: 'auto', maxHeight: 340, padding: '8px 10px 4px' }}>
+        {/* Suggested section */}
+        {hasSuggestions && (
+          <div style={{ marginBottom: 10 }}>
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--accent)', padding: '0 2px 5px' }}>Suggested</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+              {suggestions.map((key) => <TypeChip key={key} typeKey={key} />)}
             </div>
-          )
-        })}
+          </div>
+        )}
+
+        {/* All types — collapsed by default when suggestions exist */}
+        {(!hasSuggestions || showAll) ? (
+          EDGE_REL_GROUPS.map((group) => {
+            const entries = Object.entries(EDGE_RELATIONSHIP_TYPES).filter(([, cfg]) => cfg.group === group)
+            return (
+              <div key={group} style={{ marginBottom: 8 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-dimmed)', padding: '2px 2px 4px' }}>{group}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                  {entries.map(([key]) => <TypeChip key={key} typeKey={key} />)}
+                </div>
+              </div>
+            )
+          })
+        ) : (
+          <button onClick={() => setShowAll(true)} style={{
+            background: 'none', border: '1px dashed var(--border-subtle)',
+            borderRadius: 8, padding: '5px 0', width: '100%', fontSize: 11,
+            color: 'var(--text-dimmed)', cursor: 'pointer', fontFamily: 'inherit',
+            marginBottom: 8,
+          }}>Show all types ▾</button>
+        )}
+
+        {/* Custom label */}
+        <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 8, marginTop: 2 }}>
+          <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-dimmed)', marginBottom: 5 }}>Custom label</div>
+          <div style={{ display: 'flex', gap: 5 }}>
+            <input
+              ref={customRef}
+              value={customLabel}
+              onChange={(e) => setCustomLabel(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') applyCustom(); if (e.key === 'Escape') onClose() }}
+              placeholder="e.g. paid, reported to…"
+              style={{
+                flex: 1, background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)',
+                borderRadius: 6, padding: '5px 8px', fontSize: 11, color: 'var(--text-primary)',
+                outline: 'none', fontFamily: 'inherit',
+              }}
+              onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border-subtle)'}
+            />
+            <button onClick={applyCustom} disabled={!customLabel.trim()} style={{
+              background: customLabel.trim() ? 'var(--accent)' : 'var(--bg-elevated)',
+              border: 'none', borderRadius: 6, padding: '5px 10px', fontSize: 11,
+              color: customLabel.trim() ? '#fff' : 'var(--text-dimmed)',
+              cursor: customLabel.trim() ? 'pointer' : 'default', fontFamily: 'inherit',
+            }}>Set</button>
+          </div>
+        </div>
       </div>
 
       {/* Footer */}
-      <div style={{ padding: '6px 10px 8px', borderTop: '1px solid var(--border-subtle)', display: 'flex', gap: 6 }}>
+      <div style={{ padding: '7px 10px 9px', borderTop: '1px solid var(--border-subtle)', display: 'flex', gap: 6 }}>
         <button onClick={() => { deleteEdge(edgeId); setSelectedEdgeId(null); onClose() }} style={{
           flex: 1, background: 'none', border: '1px solid var(--border-subtle)',
           borderRadius: 6, padding: '5px', fontSize: 11, cursor: 'pointer',

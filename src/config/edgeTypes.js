@@ -70,3 +70,43 @@ export function inferRelationship(sourceType, targetType) {
 }
 
 export const EDGE_REL_GROUPS = ['General', 'Identity', 'Communication', 'Technical', 'Location', 'Evidence']
+
+// Returns ordered list of suggested relationship keys for a node pair, or null (show all)
+export function suggestedRelationships(sourceType, targetType) {
+  const map = {
+    'person→email':          ['owns', 'contacted', 'communicated'],
+    'person→phone':          ['owns', 'contacted', 'communicated'],
+    'person→social':         ['owns', 'alias_of', 'impersonates'],
+    'person→ip':             ['registered', 'hosted_on'],
+    'person→url':            ['owns', 'registered', 'visited'],
+    'person→address':        ['located_at', 'visited'],
+    'person→location':       ['located_at', 'visited'],
+    'person→organization':   ['member_of', 'owns'],
+    'person→person':         ['communicated', 'contacted', 'alias_of', 'member_of'],
+    'person→alias':          ['alias_of', 'impersonates'],
+    'person→vehicle':        ['owns'],
+    'person→crypto':         ['owns'],
+    'person→document':       ['references', 'evidence_of'],
+    'person→event':          ['communicated', 'located_at'],
+    'alias→person':          ['alias_of', 'impersonates'],
+    'social→person':         ['owns', 'alias_of'],
+    'email→person':          ['owns'],
+    'phone→person':          ['owns', 'contacted'],
+    'ip→url':                ['hosted_on', 'resolves_to'],
+    'ip→domain':             ['resolves_to', 'hosted_on'],
+    'url→ip':                ['hosted_on'],
+    'image→person':          ['evidence_of', 'references'],
+    'image→event':           ['evidence_of'],
+    'image→location':        ['evidence_of'],
+    'document→person':       ['evidence_of', 'references'],
+    'document→event':        ['evidence_of'],
+    'document→organization': ['evidence_of', 'references'],
+    'organization→person':   ['member_of'],
+    'organization→address':  ['located_at'],
+    'organization→location': ['located_at'],
+    'organization→ip':       ['registered', 'hosted_on'],
+    'crypto→person':         ['owns'],
+    'vehicle→person':        ['owns'],
+  }
+  return map[`${sourceType}→${targetType}`] ?? null
+}
