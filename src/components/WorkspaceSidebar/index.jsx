@@ -23,27 +23,25 @@ function NodeGrid() {
   }
 
   return (
-    <div className={styles.nodeGrid}>
+    <div className={styles.nodeList}>
       {PALETTE_GROUPS.map((group) => {
         const items = Object.entries(NODE_TYPE_CONFIG).filter(([, cfg]) => cfg.group === group)
         return (
           <div key={group} className={styles.nodeGroup}>
             <span className={styles.nodeGroupLabel}>{group}</span>
-            <div className={styles.nodeTiles}>
-              {items.map(([type, cfg]) => (
-                <div
-                  key={type}
-                  className={styles.nodeTile}
-                  style={{ '--tile-bg': cfg.color, '--tile-border': cfg.border }}
-                  draggable
-                  onDragStart={(e) => onDragStart(e, type)}
-                  onClick={() => handleClick(type)}
-                  title={cfg.label}
-                >
-                  <span className={styles.nodeTileIcon}>{cfg.icon}</span>
-                </div>
-              ))}
-            </div>
+            {items.map(([type, cfg]) => (
+              <div
+                key={type}
+                className={styles.nodeRow}
+                style={{ '--tile-bg': cfg.color, '--tile-border': cfg.border }}
+                draggable
+                onDragStart={(e) => onDragStart(e, type)}
+                onClick={() => handleClick(type)}
+              >
+                <span className={styles.nodeRowBadge}>{cfg.icon}</span>
+                <span className={styles.nodeRowLabel}>{cfg.label}</span>
+              </div>
+            ))}
           </div>
         )
       })}

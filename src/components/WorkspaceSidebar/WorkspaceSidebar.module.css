@@ -42,19 +42,23 @@
 }
 .caseStatus { font-size: 10px; }
 
-/* ── node grid ──────────────────────────────────────────────────────────────── */
-.nodeGrid {
+/* ── node list ──────────────────────────────────────────────────────────────── */
+.nodeList {
   flex-shrink: 0;
-  padding: 10px 10px 8px;
+  padding: 8px 8px 6px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 340px;
 }
+.nodeList::-webkit-scrollbar { width: 3px; }
+.nodeList::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 4px; }
 
 .nodeGroup {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 1px;
 }
 
 .nodeGroupLabel {
@@ -63,41 +67,44 @@
   letter-spacing: 0.8px;
   text-transform: uppercase;
   color: var(--text-dimmed);
+  padding: 0 4px 3px;
 }
 
-.nodeTiles {
+.nodeRow {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: grab;
+  user-select: none;
+  transition: background 0.1s;
 }
+.nodeRow:hover { background: var(--bg-elevated); }
+.nodeRow:active { cursor: grabbing; }
 
-.nodeTile {
-  width: 34px;
-  height: 34px;
+.nodeRowBadge {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--tile-bg, var(--bg-elevated));
   border: 1px solid var(--tile-border, var(--border-subtle));
-  border-radius: 7px;
-  cursor: grab;
-  transition: transform 0.1s, border-color 0.12s, box-shadow 0.12s;
-  user-select: none;
-  position: relative;
-}
-.nodeTile:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  z-index: 1;
-}
-.nodeTile:active { cursor: grabbing; transform: scale(0.92); }
-
-.nodeTileIcon {
-  font-size: 16px;
+  border-radius: 5px;
+  font-size: 13px;
   line-height: 1;
-  pointer-events: none;
 }
+
+.nodeRowLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nodeRow:hover .nodeRowLabel { color: var(--text-primary); }
 
 /* ── divider ────────────────────────────────────────────────────────────────── */
 .divider {
