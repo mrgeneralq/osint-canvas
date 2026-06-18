@@ -1,67 +1,103 @@
-﻿# OSINT Canvas
+<div align="center">
 
-A visual investigation canvas for mapping and connecting open-source intelligence. Built with React 18, Vite, and [@xyflow/react](https://reactflow.dev/). Runs fully in Docker.
+# 🔍 OSINT Canvas
+
+**A visual investigation workspace for mapping intelligence, connections, and leads — all in your browser.**
+
+[![Docker](https://img.shields.io/badge/runs%20in-Docker-2496ED?logo=docker&logoColor=white)](https://www.docker.com/products/docker-desktop/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Built with React Flow](https://img.shields.io/badge/built%20with-React%20Flow-7c8cf8)](https://reactflow.dev/)
+
+```bash
+git clone https://github.com/mrgeneralq/osint-canvas.git
+cd osint-canvas
+docker compose up -d
+```
+**Then open [http://localhost:3001](http://localhost:3001)**
+
+</div>
+
+---
+
+OSINT Canvas is a self-hosted, privacy-first tool for investigators, journalists, security researchers, and analysts. Map people, organisations, infrastructure, and events as a visual graph — connect the dots, run extraction pipelines, and build a picture that a spreadsheet can't.
+
+No accounts. No cloud. No data leaving your machine.
+
+---
+
+## What it looks like
+
+> *Canvas with nodes, edges, a typed relationship picker, and the Intelligence Sources panel*
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  👤 John Doe ──[owns]──► 📧 j.doe@proton.me                     │
+│       │                        │                                 │
+│    [member_of]            [resolves_to]                          │
+│       ▼                        ▼                                 │
+│  🏢 Acme Corp          🌐 acmecorp.io ──[hosted_on]──► 🖥 1.2.3.4│
+│                                │                                 │
+│                          [registered]                            │
+│                                ▼                                 │
+│                         📋 WHOIS record                          │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## Features
 
-### Canvas & Nodes
-- **17 node types** - Person, Phone, Email, Address, Social Profile, URL, IP/Domain, Image, Document, Note, Event, Organization, Vehicle, Location, Crypto Wallet, Alias, and **Pivot/Method**
-- **Double-click** anywhere on the canvas to open a searchable node picker
-- **Drag from the palette** to place nodes precisely, or click to add at the canvas center
-- **Inline editing** - edit node values directly on the card without opening the properties panel
-- **Collapse nodes** to save space; expand on demand
-- **Lock nodes** to prevent accidental dragging
+### 🗺 Visual Canvas
+- **38 node types** across 9 groups — Identity, Contact, Online, Technical, Financial, Physical, Evidence, Intelligence, and Method
+- **Drag from the palette** or double-click anywhere on the canvas to place a node
+- **Pull an edge handle** to empty space → ghost outline tracks your cursor → release to pick a node type and auto-connect
+- **Box-select** multiple nodes (drag on empty space), then fit-view or bulk-delete the selection
+- **Ctrl+A** to select everything; **Delete** to remove selected nodes
+- Collapse, lock, and add photos to any node
 
-### Connections & Relationships
-- **9 edge relationship types** - Link, Leads to, Same person, Confirmed via, Contradicts, Associated, Owns, Used by, Located at
-- Large **connection radius** so you don't have to pixel-hunt the handles
-- **Double-click an edge label** to rename it; click a selected edge to change its type
+### 🔗 Rich Relationships
+- **18 typed edge relationships** in 6 categories — General, Identity, Communication, Technical, Location, Evidence
+- **4 confidence levels** — Unverified → Suspected → Probable → Confirmed — visualised as stroke weight and opacity
+- **Direction control** — one-way, bidirectional, or undirected per edge
+- **Auto-inferred relationship type** when you connect two nodes, based on their types
+- **Single-click EdgePicker** — floating panel at cursor, pre-filtered suggestions + free-text custom label
+- Full edge properties in the right panel: date observed, source URL, notes
 
-### Investigation Pivots
-- **Pivot/Method nodes** document the technique used to go from one piece of intel to another
-- 18 built-in techniques: Password Reset, Breach Search, Reverse Phone, WHOIS, Reverse Image, Username Search, Google Dork, Account Recovery, Dark Web Search, and more
-- Records **input used** and spawns a connected **output node** with one click
+### 🔬 Intelligence Sources Pipeline
+- **Upload any file** (txt, csv, tsv, json, log) up to 500 MB — or register a server path
+- **Define extractors** — choose primary node type, split mode (line / CSV / TSV / JSON), optional shell command (runs in WSL/bash with `{file}` substitution), and auto-detect toggle
+- **Auto-detect 12 OSINT entity types** from free text — email, IP, URL, domain, phone, Bitcoin, Ethereum, MD5/SHA1/SHA256, IBAN, IMEI, .onion
+- **Run the pipeline** — streams progress live; each source × extractor combination produces proposals
+- **Proposal review panel** — inspect every suggested node before it touches your canvas; accept, reject, or expand to see the raw source line; bulk accept by type; import with deduplication
 
-### Data Sources
-- Define named **data sources** (breach database, public record, social media scrape, etc.) with type, date, URL, and a colour
-- **Tag any node** with one or more sources via the properties panel
-- **Filter the canvas** by source to highlight only nodes from a specific dataset
-- Coloured dots on each node show provenance at a glance
+### 🧭 Analysis Tools
+- **Path finder** — click two nodes to highlight the shortest connection chain between them
+- **Auto-layout** — one-click Dagre layout that resolves overlaps and organises nodes left-to-right
+- **Search** — dims non-matching nodes as you type
+- **Highlight neighbours** — right-click any node to isolate its direct connections
+- **Timeline** — plot events chronologically alongside the canvas
+- **Dork builder** — generate Google / Shodan / Maltego queries from any selected node value
 
-### Importing & Exporting
-- **Save / Import JSON** - full case export and import including nodes, edges, sources, and case metadata
-- **PNG export** - high-resolution (3x) snapshot of the full canvas
-- **CSV bulk import** - import many entities at once from a spreadsheet
-- **Share via URL** - compressed shareable link with the full canvas state
-- **AI Import Prompt** - copy a ready-made system prompt to paste into any AI; describe your investigation and import the JSON output directly
+### 📁 Case Management
+- Multiple named **canvases per case** — separate maps for separate threads
+- **Notes** — rich-text notes attached to the case
+- **Undo / redo** — 60-step history
+- **Report generator** — export a Markdown summary of all nodes and relationships
 
-### Analysis Tools
-- **Auto-layout** - one-click Dagre-based layout that resolves overlaps and organises nodes left-to-right
-- **Path finder** - find the shortest connection chain between any two nodes
-- **Search** - dim non-matching nodes as you type
-- **Highlight connections** - right-click a node to highlight its direct neighbours
-- **Dork Builder** - generate Google/Shodan/Maltego dork queries from a selected node value
-
-### Script Runner
-- Run **PowerShell, Python, or Bash** scripts directly from the app
-- Scripts can output structured JSON that auto-creates connected nodes on the canvas
-- Built-in examples: DNS Lookup, Port Scanner, Email Extractor, WHOIS Lookup
-- Variable injection with `$VAR` or `{{VAR}}` syntax
-
-### Case Management
-- **Case panel** - name, investigator, status (Active / Pending / Cold / Closed), and description
-- **Snapshots** - save named point-in-time snapshots to localStorage
-- **Undo / Redo** - 60-step history
-- **Report generator** - export a markdown/text summary of all nodes and relationships
+### 💾 Import & Export
+- **Save to server** — cases persist across container restarts in a Docker volume
+- **Export PNG** — high-resolution 3× snapshot of the full canvas
+- **Export / import JSON** — full case round-trip
+- **CSV bulk import** — paste a spreadsheet column of entities to create nodes instantly
+- **Share via URL** — compressed shareable link encoding the entire canvas state
+- **AI import** — copy a system prompt that tells Claude, ChatGPT, or any model exactly how to produce importable JSON; describe your investigation and paste back the result
 
 ---
 
-## Quick Start (Docker)
+## Quick Start
 
 ### Prerequisites
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — that's it.
 
 ### Run
 
@@ -71,39 +107,49 @@ cd osint-canvas
 docker compose up -d
 ```
 
-Then open **http://localhost:3001** in your browser.
-
-### Other commands
+Open **http://localhost:3001** — the Express server builds and serves the entire app. No separate frontend process, no external dependencies, no accounts.
 
 ```bash
 # Stop
 docker compose down
 
-# Rebuild after code changes
-docker compose down && docker compose build && docker compose up -d
+# Rebuild after pulling updates
+docker compose down && docker compose build --no-cache && docker compose up -d
 
 # View logs
-docker compose logs
+docker compose logs -f
 ```
+
+Data is stored in a named Docker volume (`osint-scripts`) and survives container restarts and rebuilds.
 
 ---
 
 ## Local Development
 
-### Prerequisites
-- Node.js 18+
-
-### Install & run
-
 ```bash
+# Install deps
 npm install
 
-# Start the backend (port 3001)
-node server/index.js
-
-# In a separate terminal, start the frontend dev server
+# Start both Vite dev server + Express backend together
 npm run dev
 ```
+
+The Vite dev server (port 5173) proxies API calls to Express (port 3001) automatically — no config needed.
+
+---
+
+## Intelligence Sources — walkthrough
+
+1. Open a case → click **Intelligence Sources** in the left sidebar
+2. Upload a file (e.g. a list of suspect usernames, a grep output, a breach dump excerpt)
+3. Click **+ New Extractor** → choose what the file represents (e.g. *Person*), how to split it (*one record per line*), and optionally a shell command to pre-filter it:
+   ```
+   grep -Eo '[a-z0-9.]+@[a-z0-9.]+\.[a-z]{2,}' {file}
+   ```
+4. Check **Auto-detect** to also extract emails, IPs, hashes, and other entities from each record automatically
+5. Click **▶ Run Pipeline** — watch the log stream as each source is processed
+6. Click **Review proposals** — accept what looks right, reject noise, expand cards to see the raw source line
+7. Click **Import to canvas** — accepted nodes appear on the canvas, deduplicated against what's already there, with edges auto-inferred from node type relationships
 
 ---
 
@@ -111,41 +157,34 @@ npm run dev
 
 ```
 osint-canvas/
+├── server/
+│   └── index.js              # Express API — cases, notes, sources, extractors, run (SSE)
 ├── src/
 │   ├── components/
-│   │   ├── Canvas/          # React Flow canvas, PNG export, auto-layout
-│   │   ├── nodes/           # OsintNode, OsintEdge - all node type renderers
-│   │   ├── NodePalette/     # Left panel - searchable node type grid
-│   │   ├── NodeProperties/  # Right panel - node editor
-│   │   ├── Toolbar/         # Top bar - save, export, sources, layout
-│   │   ├── SourcesModal/    # Data source management
-│   │   ├── AiPromptModal/   # AI import prompt generator
-│   │   ├── ScriptRunner/    # Script execution panel
-│   │   └── ...              # Report, Snapshots, Dorks, CSV import, etc.
+│   │   ├── Canvas/           # React Flow canvas, box-select, ghost node, edge picker
+│   │   ├── nodes/            # OsintNode, OsintEdge — renderers for all 38 types
+│   │   ├── NodeProperties/   # Right panel — node + edge property editor
+│   │   ├── WorkspaceSidebar/ # Left panel — palette, canvases, notes, sources nav
+│   │   ├── SourcesView/      # Intelligence Sources pipeline UI
+│   │   ├── ProposalPanel/    # Proposal review drawer
+│   │   ├── CaseDashboard/    # Case list and creation
+│   │   ├── Timeline/         # Chronological event view
+│   │   └── ...               # Toolbar, ContextMenu, Toast, Dorks, CSV import, etc.
 │   ├── config/
-│   │   ├── nodeTypes.js     # Node type definitions and palette groups
-│   │   ├── edgeTypes.js     # Edge relationship types and colours
-│   │   ├── methodTypes.js   # Pivot/technique definitions
-│   │   └── lookupUrls.js    # Right-click OSINT lookup URLs per node type
+│   │   ├── nodeTypes.js      # 38 node type definitions across 9 groups
+│   │   ├── edgeTypes.js      # 18 relationship types, confidence, inference logic
+│   │   └── lookupUrls.js     # Right-click OSINT lookup URLs per node type
 │   ├── store/
-│   │   └── useStore.js      # Zustand store - nodes, edges, sources, history
+│   │   └── useStore.js       # Zustand — nodes, edges, cases, pipeline, history
 │   └── utils/
-│       ├── autoLayout.js    # Dagre layout
-│       └── graphUtils.js    # Shortest path
-├── server/
-│   └── index.js             # Express API - scripts CRUD + execution
-├── Dockerfile
+│       ├── autoLayout.js     # Dagre graph layout
+│       └── graphUtils.js     # Shortest path algorithm
+├── Dockerfile                # Multi-stage: Vite build → slim Node runtime
 └── docker-compose.yml
 ```
 
 ---
 
-## AI Import
-
-Use **More -> AI Import Prompt** to copy a system prompt that tells any AI exactly how to generate valid importable JSON. Paste it into Claude, ChatGPT, or any other model, describe your investigation, save the response as a `.json` file, then use **More -> Import JSON**.
-
----
-
 ## License
 
-MIT
+MIT — use it, fork it, self-host it.

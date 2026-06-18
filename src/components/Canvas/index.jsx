@@ -38,6 +38,8 @@ export default function Canvas({ exportRef }) {
   const [edgePicker, setEdgePicker] = useState(null) // { screenX, screenY, edgeId }
   const connectingFrom = useRef(null) // nodeId being dragged from
   const suppressNextPaneClick = useRef(false)
+  const dragMoveCleanup = useRef(null)
+  const [ghostPos, setGhostPos] = useState(null) // { x, y } screen coords while dragging edge
 
   // Expose fns to parent via ref object
   useEffect(() => {
@@ -147,9 +149,17 @@ export default function Canvas({ exportRef }) {
 
   const onConnectStart = useCallback((_, { nodeId }) => {
     connectingFrom.current = nodeId
+    const handler = (e) => setGhostPos({ x: e.clientX, y: e.clientY })
+    document.addEventListener('mousemove', handler)
+    dragMoveCleanup.current = () => {
+      document.removeEventListener('mousemove', handler)
+      setGhostPos(null)
+    }
   }, [])
 
   const onConnectEnd = useCallback((event, connectionState) => {
+    dragMoveCleanup.current?.()
+    dragMoveCleanup.current = null
     const sourceNodeId = connectingFrom.current
     connectingFrom.current = null
     if (connectionState?.isValid || !sourceNodeId) return
@@ -298,6 +308,12 @@ export default function Canvas({ exportRef }) {
           edgeId={edgePicker.edgeId}
           onClose={() => setEdgePicker(null)}
         />
+      )}
+
+      {ghostPos && (
+        <div className={styles.ghostNode} style={{ left: ghostPos.x, top: ghostPos.y }}>
+          <div className={styles.ghostNodeInner}>+</div>
+        </div>
       )}
 
       {quickAdd && (

@@ -49,8 +49,7 @@ export default function SourcesView({ onOpenProposals }) {
   const handleFileUpload = async (e) => {
     const files = Array.from(e.target.files)
     for (const file of files) {
-      const content = await file.text()
-      await uploadSourceFile(file.name, content)
+      await uploadSourceFile(file)
     }
     e.target.value = ''
   }
