@@ -9,6 +9,7 @@ import ToastContainer from './components/Toast'
 import CaseDashboard from './components/CaseDashboard'
 import WorkspaceSidebar from './components/WorkspaceSidebar'
 import NoteEditor from './components/NoteEditor'
+import Timeline from './components/Timeline'
 import useStore from './store/useStore'
 import styles from './App.module.css'
 
@@ -34,6 +35,8 @@ function WorkspaceView() {
         <div className={styles.center}>
           {activeView === 'note' ? (
             <NoteEditor noteId={activeNoteId} />
+          ) : activeView === 'timeline' ? (
+            <Timeline />
           ) : (
             <Canvas exportRef={exportRef} />
           )}

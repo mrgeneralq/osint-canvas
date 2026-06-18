@@ -5,6 +5,11 @@ import { findShortestPath, getEdgesOnPath } from '../utils/graphUtils'
 import { toast } from './toastStore'
 
 let nodeCounter = 1
+const sortTimeline = (a, b) => {
+  const da = `${a.date ?? ''}T${a.time ?? '00:00'}`
+  const db = `${b.date ?? ''}T${b.time ?? '00:00'}`
+  return da.localeCompare(db)
+}
 const MAX_HISTORY = 60
 const API = 'http://localhost:3001'
 
@@ -43,13 +48,14 @@ const useStore = create((set, get) => ({
   // ── workspace ─────────────────────────────────────────────────────────────
   cases: [],
   activeCaseId: null,
-  activeView: 'dashboard', // 'dashboard' | 'canvas' | 'note'
+  activeView: 'dashboard', // 'dashboard' | 'canvas' | 'note' | 'timeline'
   activeNoteId: null,
 
   // ── canvas (per active canvas inside active case) ─────────────────────────
   canvases: [],
   activeCanvasId: null,
   notes: [],
+  timelineEntries: [],
   caseInfo: { name: '', investigator: '', status: 'Active', description: '', target: '', tags: '' },
 
   // ── canvas state ──────────────────────────────────────────────────────────
@@ -117,6 +123,7 @@ const useStore = create((set, get) => ({
         nodes: canvas?.nodes ?? [],
         edges: canvas?.edges ?? [],
         sources: canvas?.sources ?? [],
+        timelineEntries: data.timelineEntries ?? [],
         selectedNodeId: null,
         filterSourceId: null,
         history: [],
@@ -126,7 +133,7 @@ const useStore = create((set, get) => ({
   },
 
   saveCase: async () => {
-    const { activeCaseId, canvases, activeCanvasId, nodes, edges, sources, caseInfo } = get()
+    const { activeCaseId, canvases, activeCanvasId, nodes, edges, sources, caseInfo, timelineEntries } = get()
     if (!activeCaseId) return
     const updatedCanvases = canvases.map((c) =>
       c.id === activeCanvasId ? { ...c, nodes, edges, sources } : c
@@ -135,7 +142,7 @@ const useStore = create((set, get) => ({
       await fetch(`${API}/cases/${activeCaseId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...caseInfo, canvases: updatedCanvases, activeCanvasId }),
+        body: JSON.stringify({ ...caseInfo, canvases: updatedCanvases, activeCanvasId, timelineEntries }),
       })
       set({ canvases: updatedCanvases, _savePending: false })
       toast.success('Case saved')
@@ -163,6 +170,7 @@ const useStore = create((set, get) => ({
       nodes: [],
       edges: [],
       sources: [],
+      timelineEntries: [],
       selectedNodeId: null,
     })
     get().loadCases()
@@ -269,6 +277,28 @@ const useStore = create((set, get) => ({
       }))
     } catch { toast.error('Failed to delete note') }
   },
+
+  // ── timeline actions ──────────────────────────────────────────────────────
+  addTimelineEntry: (entry) => {
+    const e = {
+      id: `tl_${Date.now()}`,
+      date: entry.date ?? new Date().toISOString().slice(0, 10),
+      time: entry.time ?? '',
+      title: entry.title ?? '',
+      description: entry.description ?? '',
+      category: entry.category ?? 'event',
+      nodeId: entry.nodeId ?? null,
+      canvasId: entry.canvasId ?? null,
+      createdAt: new Date().toISOString(),
+    }
+    set({ timelineEntries: [...get().timelineEntries, e].sort(sortTimeline) })
+  },
+
+  updateTimelineEntry: (id, patch) =>
+    set({ timelineEntries: get().timelineEntries.map((e) => e.id === id ? { ...e, ...patch } : e).sort(sortTimeline) }),
+
+  deleteTimelineEntry: (id) =>
+    set({ timelineEntries: get().timelineEntries.filter((e) => e.id !== id) }),
 
   // ── canvas node/edge actions ───────────────────────────────────────────────
   onNodesChange: (changes) => set({ nodes: applyNodeChanges(changes, get().nodes) }),

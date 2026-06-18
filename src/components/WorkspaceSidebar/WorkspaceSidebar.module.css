@@ -194,3 +194,9 @@
 }
 
 .emptyHint { font-size: 11px; color: var(--text-dimmed); padding: 4px 8px 6px; margin: 0; }
+
+.timelineItem {
+  margin: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+}

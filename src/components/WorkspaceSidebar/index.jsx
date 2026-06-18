@@ -142,6 +142,15 @@ export default function WorkspaceSidebar() {
           )}
         </div>
 
+        {/* Timeline */}
+        <div
+          className={`${styles.item} ${styles.timelineItem} ${activeView === 'timeline' ? styles.itemActive : ''}`}
+          onClick={() => setActiveView('timeline')}
+        >
+          <span className={styles.itemIcon}>🕐</span>
+          <span className={styles.itemName}>Timeline</span>
+        </div>
+
         {/* Notes */}
         <div className={styles.section}>
           <button className={styles.sectionHeader} onClick={() => setNotesOpen((v) => !v)}>
