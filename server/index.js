@@ -309,6 +309,35 @@ app.get('/cases/:id/sources', (req, res) => {
   res.json(meta.sourceFiles ?? [])
 })
 
+// Raw binary upload — no size cap from JSON middleware
+app.post('/cases/:id/sources/upload', express.raw({ type: '*/*', limit: '500mb' }), (req, res) => {
+  const meta = caseMeta(join(CASES_DIR, req.params.id))
+  if (!meta) return res.status(404).json({ error: 'Case not found' })
+
+  let name
+  try { name = decodeURIComponent(req.headers['x-filename'] || 'upload.txt') } catch { name = 'upload.txt' }
+
+  const id = `sf_${Date.now()}`
+  const ext = extname(name) || '.txt'
+  const dir = filesDir(req.params.id)
+  const resolvedPath = join(dir, `${id}${ext}`)
+
+  writeFileSync(resolvedPath, req.body)
+
+  const sourceFile = {
+    id, name,
+    path: resolvedPath,
+    size: req.body.length,
+    format: ext.slice(1) || 'txt',
+    isServerPath: false,
+    createdAt: new Date().toISOString(),
+  }
+
+  const updated = { ...meta, sourceFiles: [...(meta.sourceFiles ?? []), sourceFile], updatedAt: new Date().toISOString() }
+  saveCase(req.params.id, updated)
+  res.json(sourceFile)
+})
+
 app.post('/cases/:id/sources', (req, res) => {
   const { name, content, serverPath } = req.body
   const meta = caseMeta(join(CASES_DIR, req.params.id))

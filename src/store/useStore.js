@@ -12,7 +12,7 @@ const sortTimeline = (a, b) => {
   return da.localeCompare(db)
 }
 const MAX_HISTORY = 60
-const API = 'http://localhost:3001'
+const API = import.meta.env.VITE_API_URL ?? ''
 
 function makeNode(type, position) {
   const cfg = NODE_TYPE_CONFIG[type]
@@ -314,20 +314,21 @@ const useStore = create((set, get) => ({
     set({ timelineEntries: get().timelineEntries.filter((e) => e.id !== id) }),
 
   // ── intelligence source actions ───────────────────────────────────────────
-  uploadSourceFile: async (name, content) => {
+  uploadSourceFile: async (file) => {
     const { activeCaseId } = get()
     if (!activeCaseId) return
     try {
-      const res = await fetch(`${API}/cases/${activeCaseId}/sources`, {
+      const res = await fetch(`${API}/cases/${activeCaseId}/sources/upload`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, content }),
+        headers: { 'X-Filename': encodeURIComponent(file.name) },
+        body: file,
       })
+      if (!res.ok) throw new Error(await res.text())
       const sf = await res.json()
       set((s) => ({ sourceFiles: [...s.sourceFiles, sf] }))
-      toast.success(`Source "${name}" added`)
+      toast.success(`Source "${file.name}" added`)
       return sf
-    } catch { toast.error('Failed to upload source') }
+    } catch (e) { toast.error(`Upload failed: ${e.message}`) }
   },
 
   registerServerPath: async (serverPath) => {
