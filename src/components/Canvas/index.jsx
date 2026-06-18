@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ReactFlow, Background, Controls, MiniMap,
-  BackgroundVariant, useReactFlow,
+  BackgroundVariant, useReactFlow, SelectionMode,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { toPng } from 'html-to-image'
@@ -26,8 +26,10 @@ export default function Canvas({ exportRef }) {
     addNode, setSelectedNodeId, updateNodeData, setNodes,
     searchTerm, highlightNodeIds, highlightEdgeIds,
     pathPickMode, pathPickFirst, clearHighlight,
-    undo, redo, filterSourceId,
+    undo, redo, filterSourceId, deleteNode,
   } = useStore()
+
+  const selectedCount = nodes.filter((n) => n.selected).length
 
   const { screenToFlowPosition, fitView } = useReactFlow()
   const [ctxMenu, setCtxMenu] = useState(null)
@@ -105,7 +107,11 @@ export default function Canvas({ exportRef }) {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
       if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo() }
       if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) { e.preventDefault(); redo() }
-      if (e.key === 'Escape') { clearHighlight(); setCtxMenu(null) }
+      if (e.key === 'Escape') { clearHighlight(); setCtxMenu(null); setQuickAdd(null) }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+        e.preventDefault()
+        useStore.setState({ nodes: useStore.getState().nodes.map((n) => ({ ...n, selected: true })) })
+      }
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
@@ -250,6 +256,9 @@ export default function Canvas({ exportRef }) {
         maxZoom={3}
         proOptions={{ hideAttribution: true }}
         connectionRadius={50}
+        selectionOnDrag
+        panOnDrag={[1, 2]}
+        selectionMode={SelectionMode.Partial}
       >
         <Background variant={BackgroundVariant.Dots} gap={28} size={1} color="#2d3148" />
         <Controls />
@@ -259,6 +268,17 @@ export default function Canvas({ exportRef }) {
 
       {ctxMenu && (
         <ContextMenu x={ctxMenu.x} y={ctxMenu.y} nodeId={ctxMenu.nodeId} onClose={() => setCtxMenu(null)} />
+      )}
+
+      {selectedCount > 1 && (
+        <SelectionBar
+          count={selectedCount}
+          onFit={() => fitView({ nodes: nodes.filter((n) => n.selected), padding: 0.3, duration: 300 })}
+          onDelete={() => {
+            const ids = nodes.filter((n) => n.selected).map((n) => n.id)
+            ids.forEach((id) => deleteNode(id))
+          }}
+        />
       )}
 
       {quickAdd && (
@@ -383,6 +403,32 @@ function QuickAddMenu({ screenX, screenY, sourceNodeId, onSelect, onClose }) {
         <span><kbd style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 3, padding: '1px 4px', fontSize: 9 }}>Enter</kbd> first result</span>
         <span><kbd style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 3, padding: '1px 4px', fontSize: 9 }}>Esc</kbd> close</span>
       </div>
+    </div>
+  )
+}
+
+function SelectionBar({ count, onFit, onDelete }) {
+  return (
+    <div style={{
+      position: 'absolute', bottom: 80, left: '50%', transform: 'translateX(-50%)',
+      zIndex: 400, display: 'flex', alignItems: 'center', gap: 8,
+      background: 'var(--bg-surface)', border: '1px solid var(--border-mid)',
+      borderRadius: 10, padding: '7px 14px',
+      boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+      fontSize: 12, color: 'var(--text-secondary)',
+      userSelect: 'none',
+    }}>
+      <span style={{ fontWeight: 600, color: 'var(--accent)' }}>{count}</span>
+      <span>nodes selected</span>
+      <div style={{ width: 1, height: 16, background: 'var(--border-subtle)' }} />
+      <button onClick={onFit} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: 11, padding: '2px 6px', borderRadius: 5, fontFamily: 'inherit' }}
+        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-elevated)'}
+        onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+      >Fit view</button>
+      <button onClick={onDelete} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f87171', fontSize: 11, padding: '2px 6px', borderRadius: 5, fontFamily: 'inherit' }}
+        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(248,113,113,0.1)'}
+        onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+      >Delete all</button>
     </div>
   )
 }
