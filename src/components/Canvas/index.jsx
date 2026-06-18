@@ -12,6 +12,7 @@ import OsintNode from '../nodes/OsintNode'
 import OsintEdge from '../nodes/OsintEdge'
 import ContextMenu from '../ContextMenu'
 import { NODE_TYPE_CONFIG, PALETTE_GROUPS } from '../../config/nodeTypes'
+import { EDGE_RELATIONSHIP_TYPES, EDGE_REL_GROUPS, EDGE_CONFIDENCE } from '../../config/edgeTypes'
 import { applyDagreLayout } from '../../utils/autoLayout'
 import styles from './Canvas.module.css'
 
@@ -34,6 +35,7 @@ export default function Canvas({ exportRef }) {
   const { screenToFlowPosition, fitView } = useReactFlow()
   const [ctxMenu, setCtxMenu] = useState(null)
   const [quickAdd, setQuickAdd] = useState(null) // { screenX, screenY, flowX, flowY, sourceNodeId? }
+  const [edgePicker, setEdgePicker] = useState(null) // { screenX, screenY, edgeId }
   const connectingFrom = useRef(null) // nodeId being dragged from
   const suppressNextPaneClick = useRef(false)
 
@@ -127,8 +129,9 @@ export default function Canvas({ exportRef }) {
     addNode(type, { x: pos.x - 100, y: pos.y - 40 })
   }, [screenToFlowPosition, addNode])
 
-  const onEdgeClick = useCallback((_, edge) => {
+  const onEdgeClick = useCallback((event, edge) => {
     setSelectedEdgeId(edge.id)
+    setEdgePicker({ screenX: event.clientX, screenY: event.clientY, edgeId: edge.id })
   }, [setSelectedEdgeId])
 
   const onNodeClick = useCallback((_, node) => {
@@ -164,6 +167,7 @@ export default function Canvas({ exportRef }) {
     setSelectedEdgeId(null)
     setCtxMenu(null)
     setQuickAdd(null)
+    setEdgePicker(null)
   }, [setSelectedNodeId, setSelectedEdgeId])
 
   const wrapRef = useRef()
@@ -284,6 +288,15 @@ export default function Canvas({ exportRef }) {
             const ids = nodes.filter((n) => n.selected).map((n) => n.id)
             ids.forEach((id) => deleteNode(id))
           }}
+        />
+      )}
+
+      {edgePicker && (
+        <EdgePickerMenu
+          screenX={edgePicker.screenX}
+          screenY={edgePicker.screenY}
+          edgeId={edgePicker.edgeId}
+          onClose={() => setEdgePicker(null)}
         />
       )}
 
@@ -408,6 +421,127 @@ function QuickAddMenu({ screenX, screenY, sourceNodeId, onSelect, onClose }) {
       <div style={{ padding: '6px 12px', borderTop: '1px solid var(--border-subtle)', fontSize: 9, color: 'var(--text-dimmed)', display: 'flex', gap: 10 }}>
         <span><kbd style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 3, padding: '1px 4px', fontSize: 9 }}>Enter</kbd> first result</span>
         <span><kbd style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: 3, padding: '1px 4px', fontSize: 9 }}>Esc</kbd> close</span>
+      </div>
+    </div>
+  )
+}
+
+const CONF_ORDER = ['unverified', 'suspected', 'probable', 'confirmed']
+const CONF_COLORS = { unverified: '#4b5563', suspected: '#94a3b8', probable: '#f59e0b', confirmed: '#22c55e' }
+const DIR_CYCLE = { 'one-way': 'bidirectional', 'bidirectional': 'none', 'none': 'one-way' }
+const DIR_ICONS = { 'one-way': '→', 'bidirectional': '↔', 'none': '—' }
+
+function EdgePickerMenu({ screenX, screenY, edgeId, onClose }) {
+  const ref = useRef()
+  const edges = useStore((s) => s.edges)
+  const updateEdgeData = useStore((s) => s.updateEdgeData)
+  const deleteEdge = useStore((s) => s.deleteEdge)
+  const setSelectedEdgeId = useStore((s) => s.setSelectedEdgeId)
+
+  const edge = edges.find((e) => e.id === edgeId)
+  const currentType = edge?.data?.relationshipType ?? 'default'
+  const currentConf = edge?.data?.confidence ?? 'probable'
+  const currentDir = edge?.data?.direction ?? (EDGE_RELATIONSHIP_TYPES[currentType]?.bidirectional ? 'bidirectional' : 'one-way')
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose() }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [onClose])
+
+  const W = 260
+  const H = 420
+  const left = Math.min(screenX + 12, window.innerWidth - W - 12)
+  const top  = Math.min(screenY - 20, window.innerHeight - H - 12)
+
+  if (!edge) return null
+
+  const nextConf = CONF_ORDER[(CONF_ORDER.indexOf(currentConf) + 1) % CONF_ORDER.length]
+  const nextDir  = DIR_CYCLE[currentDir]
+
+  return (
+    <div ref={ref} style={{
+      position: 'fixed', left, top, zIndex: 500, width: W,
+      background: 'var(--bg-surface)',
+      border: '1px solid var(--border-mid)',
+      borderRadius: 12,
+      boxShadow: '0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)',
+      display: 'flex', flexDirection: 'column', overflow: 'hidden',
+      fontSize: 12,
+    }}>
+      {/* Header */}
+      <div style={{ padding: '9px 12px 7px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ flex: 1, fontSize: 10, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', color: 'var(--text-dimmed)' }}>Relationship</span>
+        {/* Confidence pill */}
+        <button onClick={() => updateEdgeData(edgeId, { confidence: nextConf })} style={{
+          background: 'none', border: `1px solid ${CONF_COLORS[currentConf]}`,
+          color: CONF_COLORS[currentConf], borderRadius: 4, padding: '2px 7px',
+          fontSize: 10, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+        }} title={`Confidence: ${currentConf} — click to cycle`}>
+          {EDGE_CONFIDENCE[currentConf]?.label}
+        </button>
+        {/* Direction pill */}
+        <button onClick={() => updateEdgeData(edgeId, { direction: nextDir })} style={{
+          background: 'none', border: '1px solid var(--border-mid)',
+          color: 'var(--text-secondary)', borderRadius: 4, padding: '2px 7px',
+          fontSize: 11, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+        }} title={`Direction: ${currentDir} — click to cycle`}>
+          {DIR_ICONS[currentDir]}
+        </button>
+      </div>
+
+      {/* Type groups */}
+      <div style={{ overflowY: 'auto', maxHeight: H - 90, padding: '6px 8px 4px' }}>
+        {EDGE_REL_GROUPS.map((group) => {
+          const entries = Object.entries(EDGE_RELATIONSHIP_TYPES).filter(([, cfg]) => cfg.group === group)
+          return (
+            <div key={group} style={{ marginBottom: 6 }}>
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text-dimmed)', padding: '4px 4px 3px' }}>{group}</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                {entries.map(([key, cfg]) => {
+                  const active = currentType === key
+                  return (
+                    <button key={key} onClick={() => { updateEdgeData(edgeId, { relationshipType: key }); onClose() }}
+                      style={{
+                        background: active ? cfg.color : 'var(--bg-elevated)',
+                        color: active ? '#fff' : 'var(--text-secondary)',
+                        border: `1px solid ${active ? cfg.color : 'var(--border-subtle)'}`,
+                        borderRadius: 10, padding: '4px 10px', fontSize: 11, cursor: 'pointer', fontFamily: 'inherit',
+                        fontWeight: active ? 600 : 400,
+                        display: 'flex', alignItems: 'center', gap: 5,
+                      }}
+                      onMouseEnter={(e) => { if (!active) { e.currentTarget.style.borderColor = cfg.color; e.currentTarget.style.color = cfg.color } }}
+                      onMouseLeave={(e) => { if (!active) { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.color = 'var(--text-secondary)' } }}
+                    >
+                      {cfg.dash && <span style={{ fontSize: 8, opacity: 0.6 }}>╌</span>}
+                      {cfg.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Footer */}
+      <div style={{ padding: '6px 10px 8px', borderTop: '1px solid var(--border-subtle)', display: 'flex', gap: 6 }}>
+        <button onClick={() => { deleteEdge(edgeId); setSelectedEdgeId(null); onClose() }} style={{
+          flex: 1, background: 'none', border: '1px solid var(--border-subtle)',
+          borderRadius: 6, padding: '5px', fontSize: 11, cursor: 'pointer',
+          color: '#f87171', fontFamily: 'inherit',
+        }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(248,113,113,0.08)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+        >Delete</button>
+        <button onClick={onClose} style={{
+          flex: 1, background: 'none', border: '1px solid var(--border-subtle)',
+          borderRadius: 6, padding: '5px', fontSize: 11, cursor: 'pointer',
+          color: 'var(--text-secondary)', fontFamily: 'inherit',
+        }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-elevated)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'none'}
+        >Close</button>
       </div>
     </div>
   )
