@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { addEdge, applyNodeChanges, applyEdgeChanges } from '@xyflow/react'
 import { NODE_TYPE_CONFIG } from '../config/nodeTypes'
+import { inferRelationship } from '../config/edgeTypes'
 import { findShortestPath, getEdgesOnPath } from '../utils/graphUtils'
 import { toast } from './toastStore'
 
@@ -63,6 +64,7 @@ const useStore = create((set, get) => ({
   edges: [],
   sources: [],
   selectedNodeId: null,
+  selectedEdgeId: null,
   searchTerm: '',
   highlightNodeIds: null,
   highlightEdgeIds: null,
@@ -124,7 +126,7 @@ const useStore = create((set, get) => ({
         edges: canvas?.edges ?? [],
         sources: canvas?.sources ?? [],
         timelineEntries: data.timelineEntries ?? [],
-        selectedNodeId: null,
+        selectedNodeId: null, selectedEdgeId: null,
         filterSourceId: null,
         history: [],
         historyIndex: -1,
@@ -171,7 +173,7 @@ const useStore = create((set, get) => ({
       edges: [],
       sources: [],
       timelineEntries: [],
-      selectedNodeId: null,
+      selectedNodeId: null, selectedEdgeId: null,
     })
     get().loadCases()
   },
@@ -206,7 +208,7 @@ const useStore = create((set, get) => ({
       nodes: target.nodes ?? [],
       edges: target.edges ?? [],
       sources: target.sources ?? [],
-      selectedNodeId: null,
+      selectedNodeId: null, selectedEdgeId: null,
       filterSourceId: null,
       history: [],
       historyIndex: -1,
@@ -229,7 +231,7 @@ const useStore = create((set, get) => ({
         nodes: next.nodes ?? [],
         edges: next.edges ?? [],
         sources: next.sources ?? [],
-        selectedNodeId: null,
+        selectedNodeId: null, selectedEdgeId: null,
       })
     } else {
       set({ canvases: remaining })
@@ -306,7 +308,11 @@ const useStore = create((set, get) => ({
 
   onConnect: (connection) => {
     get()._pushHistory()
-    set({ edges: addEdge({ ...connection, type: 'osint', data: { label: '', relationshipType: 'default' } }, get().edges) })
+    const nodes = get().nodes
+    const srcNode = nodes.find((n) => n.id === connection.source)
+    const tgtNode = nodes.find((n) => n.id === connection.target)
+    const relType = inferRelationship(srcNode?.data?.nodeType, tgtNode?.data?.nodeType)
+    set({ edges: addEdge({ ...connection, type: 'osint', data: { label: '', relationshipType: relType, confidence: 'probable' } }, get().edges) })
   },
 
   onNodeDragStop: () => get()._pushHistory(),
@@ -334,7 +340,8 @@ const useStore = create((set, get) => ({
     toast.info('Redone')
   },
 
-  setSelectedNodeId: (id) => set({ selectedNodeId: id }),
+  setSelectedNodeId: (id) => set({ selectedNodeId: id, selectedEdgeId: null }),
+  setSelectedEdgeId: (id) => set({ selectedEdgeId: id, selectedNodeId: null }),
 
   addNode: (type, position) => {
     get()._pushHistory()
@@ -346,17 +353,18 @@ const useStore = create((set, get) => ({
   updateNodeData: (id, patch) =>
     set({ nodes: get().nodes.map((n) => n.id === id ? { ...n, data: { ...n.data, ...patch } } : n) }),
 
-  addConnectedNode: (sourceId, nodeType, edgeRelationshipType = 'leads_to') => {
+  addConnectedNode: (sourceId, nodeType) => {
     get()._pushHistory()
     const src = get().nodes.find((n) => n.id === sourceId)
     const pos = src ? { x: src.position.x + 280, y: src.position.y } : { x: 400, y: 400 }
     const newNode = makeNode(nodeType, pos)
+    const relType = inferRelationship(src?.data?.nodeType, nodeType)
     const newEdge = {
       id: `edge_${Date.now()}`,
       source: sourceId,
       target: newNode.id,
       type: 'osint',
-      data: { label: '', relationshipType: edgeRelationshipType },
+      data: { label: '', relationshipType: relType, confidence: 'probable' },
     }
     set({ nodes: [...get().nodes, newNode], edges: [...get().edges, newEdge], selectedNodeId: newNode.id })
     return newNode.id

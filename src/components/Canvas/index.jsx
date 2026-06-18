@@ -23,7 +23,7 @@ export default function Canvas({ exportRef }) {
   const {
     nodes, edges,
     onNodesChange, onEdgesChange, onConnect, onNodeDragStop,
-    addNode, setSelectedNodeId, updateNodeData, setNodes,
+    addNode, setSelectedNodeId, setSelectedEdgeId, updateNodeData, setNodes,
     searchTerm, highlightNodeIds, highlightEdgeIds,
     pathPickMode, pathPickFirst, clearHighlight,
     undo, redo, filterSourceId, deleteNode,
@@ -127,6 +127,10 @@ export default function Canvas({ exportRef }) {
     addNode(type, { x: pos.x - 100, y: pos.y - 40 })
   }, [screenToFlowPosition, addNode])
 
+  const onEdgeClick = useCallback((_, edge) => {
+    setSelectedEdgeId(edge.id)
+  }, [setSelectedEdgeId])
+
   const onNodeClick = useCallback((_, node) => {
     if (pathPickMode) { useStore.getState().pickPathNode(node.id); return }
     setSelectedNodeId(node.id)
@@ -157,9 +161,10 @@ export default function Canvas({ exportRef }) {
   const onPaneClick = useCallback(() => {
     if (suppressNextPaneClick.current) { suppressNextPaneClick.current = false; return }
     setSelectedNodeId(null)
+    setSelectedEdgeId(null)
     setCtxMenu(null)
     setQuickAdd(null)
-  }, [setSelectedNodeId])
+  }, [setSelectedNodeId, setSelectedEdgeId])
 
   const wrapRef = useRef()
   useEffect(() => {
@@ -242,6 +247,7 @@ export default function Canvas({ exportRef }) {
         onNodeDragStop={onNodeDragStop}
         onDrop={onDrop}
         onDragOver={onDragOver}
+        onEdgeClick={onEdgeClick}
         onNodeClick={onNodeClick}
         onNodeContextMenu={onNodeContextMenu}
         onPaneClick={onPaneClick}

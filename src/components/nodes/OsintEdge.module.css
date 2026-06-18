@@ -85,3 +85,42 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
+
+.typeGroupLabel {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-dimmed);
+  padding: 5px 8px 2px;
+}
+
+.typeOptionActive { background: var(--bg-hover) !important; color: #fff !important; }
+
+.typeCancel {
+  margin: 4px 4px 0;
+  width: calc(100% - 8px);
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 5px;
+  color: var(--text-dimmed);
+  font-size: 10px;
+  padding: 4px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.typeCancel:hover { background: var(--bg-hover); }
+
+.pipBtn {
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 4px;
+  line-height: 1.2;
+  font-family: inherit;
+  opacity: 0.85;
+}
+.pipBtn:hover { opacity: 1; }
