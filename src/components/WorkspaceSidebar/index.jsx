@@ -151,6 +151,15 @@ export default function WorkspaceSidebar() {
           <span className={styles.itemName}>Timeline</span>
         </div>
 
+        {/* Intelligence Sources */}
+        <div
+          className={`${styles.item} ${styles.timelineItem} ${activeView === 'sources' ? styles.itemActive : ''}`}
+          onClick={() => setActiveView('sources')}
+        >
+          <span className={styles.itemIcon}>🔬</span>
+          <span className={styles.itemName}>Intelligence Sources</span>
+        </div>
+
         {/* Notes */}
         <div className={styles.section}>
           <button className={styles.sectionHeader} onClick={() => setNotesOpen((v) => !v)}>

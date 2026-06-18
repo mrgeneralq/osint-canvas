@@ -10,17 +10,22 @@ import CaseDashboard from './components/CaseDashboard'
 import WorkspaceSidebar from './components/WorkspaceSidebar'
 import NoteEditor from './components/NoteEditor'
 import Timeline from './components/Timeline'
+import SourcesView from './components/SourcesView'
+import ProposalPanel from './components/ProposalPanel'
 import useStore from './store/useStore'
 import styles from './App.module.css'
 
 function WorkspaceView() {
   const exportRef = useRef(null)
   const [propsOpen, setPropsOpen] = useState(true)
+  const [proposalsOpen, setProposalsOpen] = useState(false)
   const selectedNodeId = useStore((s) => s.selectedNodeId)
   const activeView = useStore((s) => s.activeView)
   const activeNoteId = useStore((s) => s.activeNoteId)
 
   useEffect(() => { if (selectedNodeId) setPropsOpen(true) }, [selectedNodeId])
+
+  const isSourcesView = activeView === 'sources'
 
   return (
     <div className={styles.layout}>
@@ -37,15 +42,22 @@ function WorkspaceView() {
             <NoteEditor noteId={activeNoteId} />
           ) : activeView === 'timeline' ? (
             <Timeline />
+          ) : activeView === 'sources' ? (
+            <SourcesView onOpenProposals={() => setProposalsOpen(true)} />
           ) : (
             <Canvas exportRef={exportRef} />
           )}
         </div>
-        <div className={`${styles.panel} ${propsOpen ? styles.panelOpen : styles.panelClosed}`}>
-          <NodeProperties />
-        </div>
+        {!isSourcesView && (
+          <div className={`${styles.panel} ${propsOpen ? styles.panelOpen : styles.panelClosed}`}>
+            <NodeProperties />
+          </div>
+        )}
       </div>
       <StatsBar />
+      {proposalsOpen && (
+        <ProposalPanel onClose={() => setProposalsOpen(false)} />
+      )}
     </div>
   )
 }

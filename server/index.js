@@ -1,9 +1,9 @@
 import express from 'express'
 import cors from 'cors'
 import { spawn } from 'child_process'
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, rmSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'fs'
 import { fileURLToPath } from 'url'
-import { dirname, join } from 'path'
+import { dirname, join, extname, basename } from 'path'
 
 const __dir = dirname(fileURLToPath(import.meta.url))
 const DATA_DIR = process.env.DATA_DIR || __dir
@@ -73,23 +73,42 @@ function loadScripts() {
 }
 function saveScripts(scripts) { writeFileSync(SCRIPTS_FILE, JSON.stringify(scripts, null, 2)) }
 
-// ── entity auto-detection ─────────────────────────────────────────────────────
-const PATTERNS = [
-  { type: 'email',  re: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g },
-  { type: 'ip',     re: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g },
-  { type: 'url',    re: /https?:\/\/[^\s"'<>]+/g },
-  { type: 'phone',  re: /\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b/g },
-  { type: 'crypto', re: /\b(?:0x[a-fA-F0-9]{40}|[13][a-zA-Z0-9]{25,34}|bc1[a-z0-9]{39,59})\b/g },
+// ── OSINT pattern detection ───────────────────────────────────────────────────
+const OSINT_PATTERNS = [
+  { id: 'email',       nodeType: 'email',        label: 'Email',        re: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g },
+  { id: 'ip',          nodeType: 'ip',            label: 'IP Address',   re: /\b(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?:\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)){3}\b/g },
+  { id: 'url',         nodeType: 'url',           label: 'URL',          re: /https?:\/\/[^\s"'<>\]]+/g },
+  { id: 'domain',      nodeType: 'domain',        label: 'Domain',       re: /\b(?:[a-zA-Z0-9\-]+\.)+(?:com|net|org|io|co|uk|de|nl|ru|fr|es|onion|gov|edu|biz|info|me|app|dev|xyz)\b/gi },
+  { id: 'phone',       nodeType: 'phone',         label: 'Phone',        re: /\b(?:\+\d{1,3}[\s\-]?)?\(?\d{3}\)?[\s\-.]?\d{3}[\s\-.]?\d{4}\b/g },
+  { id: 'btc',         nodeType: 'crypto',        label: 'Bitcoin',      re: /\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b|\bbc1[a-z0-9]{39,59}\b/g },
+  { id: 'eth',         nodeType: 'crypto',        label: 'Ethereum',     re: /\b0x[a-fA-F0-9]{40}\b/g },
+  { id: 'hash_md5',    nodeType: 'file_hash',     label: 'MD5 Hash',     re: /\b[a-fA-F0-9]{32}\b/g },
+  { id: 'hash_sha1',   nodeType: 'file_hash',     label: 'SHA1 Hash',    re: /\b[a-fA-F0-9]{40}\b/g },
+  { id: 'hash_sha256', nodeType: 'file_hash',     label: 'SHA256 Hash',  re: /\b[a-fA-F0-9]{64}\b/g },
+  { id: 'iban',        nodeType: 'bank_account',  label: 'IBAN',         re: /\b[A-Z]{2}\d{2}[A-Z0-9]{4}\d{7}[A-Z0-9]{0,16}\b/g },
+  { id: 'imei',        nodeType: 'imei',          label: 'IMEI',         re: /\b\d{15}\b/g },
+  { id: 'onion',       nodeType: 'darkweb',       label: 'Onion address',re: /\b[a-z2-7]{16,56}\.onion\b/gi },
 ]
 
-function extractEntities(text) {
+// Relationship inferences for auto-detected secondaries
+const SECONDARY_RELS = {
+  email: 'owns', ip: 'owns', url: 'owns', domain: 'owns', phone: 'owns',
+  crypto: 'owns', file_hash: 'evidence_of', bank_account: 'owns', imei: 'owns', darkweb: 'owns',
+}
+
+function detectEntities(text, excludeNodeType = null) {
   const seen = new Set()
   const results = []
-  for (const { type, re } of PATTERNS) {
-    re.lastIndex = 0
-    for (const m of text.matchAll(re)) {
+  for (const pat of OSINT_PATTERNS) {
+    if (pat.nodeType === excludeNodeType) continue
+    pat.re.lastIndex = 0
+    for (const m of text.matchAll(pat.re)) {
       const value = m[0].trim()
-      if (!seen.has(value)) { seen.add(value); results.push({ type, value }) }
+      const key = `${pat.nodeType}:${value}`
+      if (!seen.has(key)) {
+        seen.add(key)
+        results.push({ patternId: pat.id, nodeType: pat.nodeType, label: pat.label, value })
+      }
     }
   }
   return results
@@ -110,12 +129,100 @@ function parseOutput(raw, script) {
         continue
       } catch { /* not JSON */ }
     }
-    extractEntities(line).forEach((e) => {
+    detectEntities(line).forEach((e) => {
       if (!nodes.find((n) => n.value === e.value))
-        nodes.push({ ...e, note: `From: ${script.name}`, confidence: 'unverified' })
+        nodes.push({ type: e.nodeType, value: e.value, note: `From: ${script.name}`, confidence: 'unverified' })
     })
   }
   return { nodes, edges }
+}
+
+// ── source file helpers ───────────────────────────────────────────────────────
+function filesDir(caseId) {
+  const dir = join(CASES_DIR, caseId, 'files')
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
+  return dir
+}
+
+function splitRecords(content, splitBy) {
+  if (splitBy === 'csv') {
+    const lines = content.split('\n').map((l) => l.trim()).filter(Boolean)
+    const headers = lines[0]?.split(',').map((h) => h.trim().replace(/^"|"$/g, ''))
+    return lines.slice(1).map((line) => {
+      const vals = line.split(',').map((v) => v.trim().replace(/^"|"$/g, ''))
+      const obj = {}
+      headers?.forEach((h, i) => { obj[h] = vals[i] ?? '' })
+      return { raw: line, fields: obj }
+    })
+  }
+  if (splitBy === 'json') {
+    try {
+      const parsed = JSON.parse(content)
+      const arr = Array.isArray(parsed) ? parsed : [parsed]
+      return arr.map((item) => ({ raw: JSON.stringify(item), fields: item }))
+    } catch { return [{ raw: content, fields: {} }] }
+  }
+  if (splitBy === 'tsv') {
+    const lines = content.split('\n').map((l) => l.trim()).filter(Boolean)
+    const headers = lines[0]?.split('\t').map((h) => h.trim())
+    return lines.slice(1).map((line) => {
+      const vals = line.split('\t').map((v) => v.trim())
+      const obj = {}
+      headers?.forEach((h, i) => { obj[h] = vals[i] ?? '' })
+      return { raw: line, fields: obj }
+    })
+  }
+  // default: line by line
+  return content.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => ({ raw: l, fields: {} }))
+}
+
+function buildProposals(records, extractor, sourceId, sourceName) {
+  const proposals = []
+  for (const rec of records) {
+    // Primary value: use fieldMapping if set, else whole raw line
+    let primaryValue = rec.raw
+    if (extractor.fieldMapping?.primary && rec.fields[extractor.fieldMapping.primary]) {
+      primaryValue = rec.fields[extractor.fieldMapping.primary]
+    }
+    if (!primaryValue.trim()) continue
+
+    // Detect secondaries from full raw text (skip same type as primary)
+    const secondaries = extractor.autoDetect
+      ? detectEntities(rec.raw, extractor.primaryNodeType)
+          .filter((e) => e.value !== primaryValue)
+      : []
+
+    // Also extract mapped secondary fields
+    if (extractor.fieldMapping?.secondaries) {
+      for (const { field, nodeType } of extractor.fieldMapping.secondaries) {
+        const val = rec.fields[field]
+        if (val && !secondaries.find((s) => s.value === val)) {
+          secondaries.push({ patternId: 'field_map', nodeType, label: nodeType, value: val })
+        }
+      }
+    }
+
+    proposals.push({
+      id: `prop_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      sourceId,
+      sourceName,
+      extractorId: extractor.id,
+      extractorName: extractor.name,
+      primaryNode: {
+        nodeType: extractor.primaryNodeType,
+        value: primaryValue.trim(),
+        rawText: rec.raw,
+      },
+      secondaryNodes: secondaries.map((s) => ({
+        nodeType: s.nodeType,
+        value: s.value,
+        patternId: s.patternId,
+        relationship: SECONDARY_RELS[s.nodeType] ?? 'linked to',
+      })),
+      status: 'pending',
+    })
+  }
+  return proposals
 }
 
 // ── case routes ───────────────────────────────────────────────────────────────
@@ -193,6 +300,173 @@ app.delete('/cases/:id/notes/:noteId', (req, res) => {
   const file = join(notesDir(req.params.id), `${req.params.noteId}.json`)
   if (existsSync(file)) rmSync(file)
   res.json({ ok: true })
+})
+
+// ── source file routes ────────────────────────────────────────────────────────
+app.get('/cases/:id/sources', (req, res) => {
+  const meta = caseMeta(join(CASES_DIR, req.params.id))
+  if (!meta) return res.status(404).json({ error: 'Case not found' })
+  res.json(meta.sourceFiles ?? [])
+})
+
+app.post('/cases/:id/sources', (req, res) => {
+  const { name, content, serverPath } = req.body
+  const meta = caseMeta(join(CASES_DIR, req.params.id))
+  if (!meta) return res.status(404).json({ error: 'Case not found' })
+
+  const id = `sf_${Date.now()}`
+  let resolvedPath, size, format
+
+  if (serverPath) {
+    // Register a path already on the server filesystem
+    if (!existsSync(serverPath)) return res.status(400).json({ error: 'Path not found on server' })
+    const stat = statSync(serverPath)
+    resolvedPath = serverPath
+    size = stat.size
+    format = extname(serverPath).slice(1) || 'txt'
+  } else if (content !== undefined) {
+    // Upload content directly
+    const dir = filesDir(req.params.id)
+    const ext = extname(name || 'file.txt') || '.txt'
+    resolvedPath = join(dir, `${id}${ext}`)
+    writeFileSync(resolvedPath, content, 'utf8')
+    size = Buffer.byteLength(content, 'utf8')
+    format = ext.slice(1) || 'txt'
+  } else {
+    return res.status(400).json({ error: 'Provide content or serverPath' })
+  }
+
+  const sourceFile = {
+    id,
+    name: name || basename(serverPath || 'upload'),
+    path: resolvedPath,
+    size,
+    format,
+    isServerPath: !!serverPath,
+    createdAt: new Date().toISOString(),
+  }
+
+  const updated = { ...meta, sourceFiles: [...(meta.sourceFiles ?? []), sourceFile], updatedAt: new Date().toISOString() }
+  saveCase(req.params.id, updated)
+  res.json(sourceFile)
+})
+
+app.delete('/cases/:id/sources/:srcId', (req, res) => {
+  const meta = caseMeta(join(CASES_DIR, req.params.id))
+  if (!meta) return res.status(404).json({ error: 'Case not found' })
+  const src = (meta.sourceFiles ?? []).find((s) => s.id === req.params.srcId)
+  // Only delete the file if we uploaded it (not a registered server path)
+  if (src && !src.isServerPath && existsSync(src.path)) rmSync(src.path)
+  const updated = { ...meta, sourceFiles: (meta.sourceFiles ?? []).filter((s) => s.id !== req.params.srcId) }
+  saveCase(req.params.id, updated)
+  res.json({ ok: true })
+})
+
+// ── extractor routes ──────────────────────────────────────────────────────────
+app.get('/cases/:id/extractors', (req, res) => {
+  const meta = caseMeta(join(CASES_DIR, req.params.id))
+  if (!meta) return res.status(404).json({ error: 'Case not found' })
+  res.json(meta.extractors ?? [])
+})
+
+app.post('/cases/:id/extractors', (req, res) => {
+  const meta = caseMeta(join(CASES_DIR, req.params.id))
+  if (!meta) return res.status(404).json({ error: 'Case not found' })
+  const extractor = {
+    id: `ext_${Date.now()}`,
+    name: req.body.name ?? 'Untitled Extractor',
+    primaryNodeType: req.body.primaryNodeType ?? 'person',
+    splitBy: req.body.splitBy ?? 'line',
+    command: req.body.command ?? '',
+    autoDetect: req.body.autoDetect ?? true,
+    fieldMapping: req.body.fieldMapping ?? null,
+    createdAt: new Date().toISOString(),
+  }
+  const updated = { ...meta, extractors: [...(meta.extractors ?? []), extractor] }
+  saveCase(req.params.id, updated)
+  res.json(extractor)
+})
+
+app.put('/cases/:id/extractors/:extId', (req, res) => {
+  const meta = caseMeta(join(CASES_DIR, req.params.id))
+  if (!meta) return res.status(404).json({ error: 'Case not found' })
+  const extractors = (meta.extractors ?? []).map((e) =>
+    e.id === req.params.extId ? { ...e, ...req.body, id: e.id } : e
+  )
+  saveCase(req.params.id, { ...meta, extractors })
+  res.json(extractors.find((e) => e.id === req.params.extId))
+})
+
+app.delete('/cases/:id/extractors/:extId', (req, res) => {
+  const meta = caseMeta(join(CASES_DIR, req.params.id))
+  if (!meta) return res.status(404).json({ error: 'Case not found' })
+  saveCase(req.params.id, { ...meta, extractors: (meta.extractors ?? []).filter((e) => e.id !== req.params.extId) })
+  res.json({ ok: true })
+})
+
+// ── run endpoint ──────────────────────────────────────────────────────────────
+app.post('/cases/:id/run', async (req, res) => {
+  const meta = caseMeta(join(CASES_DIR, req.params.id))
+  if (!meta) return res.status(404).json({ error: 'Case not found' })
+
+  const { extractorIds = 'all', sourceIds = 'all' } = req.body
+  const extractors = (meta.extractors ?? []).filter((e) =>
+    extractorIds === 'all' || extractorIds.includes(e.id)
+  )
+  const sources = (meta.sourceFiles ?? []).filter((s) =>
+    sourceIds === 'all' || sourceIds.includes(s.id)
+  )
+
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache')
+  res.setHeader('Connection', 'keep-alive')
+
+  const send = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`)
+  const allProposals = []
+
+  for (const extractor of extractors) {
+    for (const source of sources) {
+      send({ type: 'progress', message: `Running "${extractor.name}" on ${source.name}…` })
+
+      try {
+        let content
+        if (!existsSync(source.path)) {
+          send({ type: 'warn', message: `File not found: ${source.path}` })
+          continue
+        }
+
+        if (extractor.command) {
+          // Run shell command with {file} substituted
+          const cmd = extractor.command.replaceAll('{file}', source.path).replaceAll('{dir}', source.path)
+          content = await new Promise((resolve, reject) => {
+            const proc = spawn('bash', ['-c', cmd], { shell: false })
+            let out = ''
+            proc.stdout.on('data', (d) => { out += d.toString() })
+            proc.stderr.on('data', (d) => { send({ type: 'stderr', message: d.toString().trim() }) })
+            proc.on('close', (code) => {
+              send({ type: 'progress', message: `Command exited (${code})` })
+              resolve(out)
+            })
+            proc.on('error', reject)
+          })
+        } else {
+          content = readFileSync(source.path, 'utf8')
+        }
+
+        const records = splitRecords(content, extractor.splitBy)
+        send({ type: 'progress', message: `Parsed ${records.length} records` })
+
+        const proposals = buildProposals(records, extractor, source.id, source.name)
+        allProposals.push(...proposals)
+        send({ type: 'progress', message: `Generated ${proposals.length} proposals` })
+      } catch (err) {
+        send({ type: 'error', message: err.message })
+      }
+    }
+  }
+
+  send({ type: 'done', proposals: allProposals, total: allProposals.length })
+  res.end()
 })
 
 // ── script routes ─────────────────────────────────────────────────────────────

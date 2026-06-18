@@ -1,0 +1,377 @@
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100vh;
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-mid);
+  display: flex;
+  flex-direction: column;
+  z-index: 600;
+  box-shadow: -8px 0 32px rgba(0,0,0,0.5);
+}
+
+/* ── header ─────────────────────────────────────────────────────────────────── */
+.header {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-elevated);
+}
+
+.headerTop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 8px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.stats { display: flex; gap: 6px; }
+.statChip { font-size: 10px; font-weight: 600; }
+
+.closeBtn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-dimmed);
+  font-size: 13px;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+.closeBtn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 8px;
+}
+.searchIcon { font-size: 12px; color: var(--text-dimmed); }
+.searchInput {
+  flex: 1;
+  background: var(--bg-base);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 11px;
+  padding: 5px 8px;
+  outline: none;
+  font-family: inherit;
+}
+.searchInput:focus { border-color: var(--accent); }
+
+.bulkRow {
+  display: flex;
+  gap: 5px;
+  padding: 0 12px 8px;
+}
+
+.bulkBtn {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.bulkBtn:hover { background: var(--bg-hover); }
+
+.bulkBtnDanger {
+  composes: bulkBtn;
+  color: #f87171;
+  border-color: rgba(248,113,113,0.3);
+}
+.bulkBtnDanger:hover { background: rgba(248,113,113,0.08); }
+
+/* ── type tabs ──────────────────────────────────────────────────────────────── */
+.typeTabs {
+  display: flex;
+  gap: 3px;
+  padding: 0 10px 8px;
+  overflow-x: auto;
+  flex-wrap: wrap;
+}
+.typeTabs::-webkit-scrollbar { height: 2px; }
+
+.typeTab {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-dimmed);
+  font-size: 10px;
+  padding: 3px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.typeTab:hover { border-color: var(--border-mid); color: var(--text-secondary); }
+.typeTabActive {
+  background: var(--tab-col, rgba(124,140,248,0.1));
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+/* ── list ───────────────────────────────────────────────────────────────────── */
+.list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 10px;
+}
+.list::-webkit-scrollbar { width: 3px; }
+.list::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 4px; }
+
+.runningBanner {
+  text-align: center;
+  color: var(--text-dimmed);
+  font-size: 12px;
+  padding: 16px;
+  background: rgba(124,140,248,0.05);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-dimmed);
+  font-size: 12px;
+  gap: 6px;
+}
+.emptyIcon { font-size: 36px; }
+
+/* ── group ──────────────────────────────────────────────────────────────────── */
+.group { margin-bottom: 14px; }
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px 6px;
+}
+
+.groupIcon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.groupLabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.groupCount {
+  font-size: 10px;
+  color: var(--text-dimmed);
+  background: var(--bg-elevated);
+  border-radius: 8px;
+  padding: 0 6px;
+}
+
+.groupAcceptAll {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 9px;
+  color: #4ade80;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: inherit;
+}
+.groupAcceptAll:hover { background: rgba(74,222,128,0.08); }
+
+/* ── proposal card ──────────────────────────────────────────────────────────── */
+.card {
+  border: 1px solid var(--border-subtle);
+  border-radius: 9px;
+  margin-bottom: 5px;
+  background: var(--bg-base);
+  transition: border-color 0.15s;
+  overflow: hidden;
+}
+
+.cardMain {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+}
+
+.statusBtn {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  background: none;
+  border: 2px solid var(--border-mid);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dimmed);
+  transition: border-color 0.1s, background 0.1s;
+}
+.statusBtn:hover:not(:disabled) { border-color: #4ade80; color: #4ade80; }
+.statusAccepted { background: rgba(74,222,128,0.15) !important; border-color: #4ade80 !important; color: #4ade80 !important; }
+.statusRejected { background: rgba(107,114,128,0.1) !important; border-color: #4b5563 !important; color: #4b5563 !important; }
+.statusImported { background: rgba(96,165,250,0.15) !important; border-color: #60a5fa !important; color: #60a5fa !important; cursor: default !important; }
+
+.cardIcon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.cardContent { flex: 1; min-width: 0; }
+.cardValue {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--text-dimmed);
+  margin-top: 1px;
+}
+
+.existsBadge {
+  background: rgba(245,158,11,0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 4px;
+  padding: 0 5px;
+  font-size: 9px;
+}
+
+.expandBtn {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 5px;
+  color: var(--text-dimmed);
+  font-size: 9px;
+  padding: 2px 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+.expandBtn:hover { background: var(--bg-elevated); color: var(--text-secondary); }
+
+.rejectBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-dimmed);
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.rejectBtn:hover { color: #f87171; background: rgba(248,113,113,0.08); }
+
+/* ── expanded details ───────────────────────────────────────────────────────── */
+.cardExpanded {
+  padding: 0 10px 10px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.secondaries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.secChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.secRel {
+  color: var(--text-dimmed);
+  font-size: 9px;
+  font-style: italic;
+}
+
+.rawText {
+  font-size: 10px;
+  color: var(--text-dimmed);
+  background: var(--bg-elevated);
+  border-radius: 5px;
+  padding: 5px 8px;
+  word-break: break-all;
+}
+
+.rawLabel { font-weight: 600; color: var(--text-dimmed); }
+.rawValue { color: var(--text-secondary); }
+
+/* ── import bar ─────────────────────────────────────────────────────────────── */
+.importBar {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-mid);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-elevated);
+}
+
+.importCount {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.importBtn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.importBtn:hover { opacity: 0.85; }

@@ -59,6 +59,13 @@ const useStore = create((set, get) => ({
   timelineEntries: [],
   caseInfo: { name: '', investigator: '', status: 'Active', description: '', target: '', tags: '' },
 
+  // ── intelligence sources ──────────────────────────────────────────────────
+  sourceFiles: [],
+  extractors: [],
+  proposals: [],
+  runLog: [],
+  isRunning: false,
+
   // ── canvas state ──────────────────────────────────────────────────────────
   nodes: [],
   edges: [],
@@ -126,6 +133,10 @@ const useStore = create((set, get) => ({
         edges: canvas?.edges ?? [],
         sources: canvas?.sources ?? [],
         timelineEntries: data.timelineEntries ?? [],
+        sourceFiles: data.sourceFiles ?? [],
+        extractors: data.extractors ?? [],
+        proposals: [],
+        runLog: [],
         selectedNodeId: null, selectedEdgeId: null,
         filterSourceId: null,
         history: [],
@@ -301,6 +312,214 @@ const useStore = create((set, get) => ({
 
   deleteTimelineEntry: (id) =>
     set({ timelineEntries: get().timelineEntries.filter((e) => e.id !== id) }),
+
+  // ── intelligence source actions ───────────────────────────────────────────
+  uploadSourceFile: async (name, content) => {
+    const { activeCaseId } = get()
+    if (!activeCaseId) return
+    try {
+      const res = await fetch(`${API}/cases/${activeCaseId}/sources`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, content }),
+      })
+      const sf = await res.json()
+      set((s) => ({ sourceFiles: [...s.sourceFiles, sf] }))
+      toast.success(`Source "${name}" added`)
+      return sf
+    } catch { toast.error('Failed to upload source') }
+  },
+
+  registerServerPath: async (serverPath) => {
+    const { activeCaseId } = get()
+    if (!activeCaseId) return
+    try {
+      const res = await fetch(`${API}/cases/${activeCaseId}/sources`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ serverPath }),
+      })
+      const sf = await res.json()
+      set((s) => ({ sourceFiles: [...s.sourceFiles, sf] }))
+      toast.success(`Path registered: ${sf.name}`)
+      return sf
+    } catch (e) { toast.error(e.message ?? 'Failed to register path') }
+  },
+
+  deleteSourceFile: async (id) => {
+    const { activeCaseId } = get()
+    if (!activeCaseId) return
+    try {
+      await fetch(`${API}/cases/${activeCaseId}/sources/${id}`, { method: 'DELETE' })
+      set((s) => ({ sourceFiles: s.sourceFiles.filter((f) => f.id !== id) }))
+    } catch { toast.error('Failed to delete source') }
+  },
+
+  saveExtractor: async (extractor) => {
+    const { activeCaseId } = get()
+    if (!activeCaseId) return
+    try {
+      const isNew = !extractor.id
+      const res = await fetch(
+        isNew ? `${API}/cases/${activeCaseId}/extractors` : `${API}/cases/${activeCaseId}/extractors/${extractor.id}`,
+        { method: isNew ? 'POST' : 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(extractor) }
+      )
+      const saved = await res.json()
+      set((s) => ({
+        extractors: isNew
+          ? [...s.extractors, saved]
+          : s.extractors.map((e) => (e.id === saved.id ? saved : e)),
+      }))
+      toast.success(isNew ? 'Extractor created' : 'Extractor updated')
+      return saved
+    } catch { toast.error('Failed to save extractor') }
+  },
+
+  deleteExtractor: async (id) => {
+    const { activeCaseId } = get()
+    if (!activeCaseId) return
+    try {
+      await fetch(`${API}/cases/${activeCaseId}/extractors/${id}`, { method: 'DELETE' })
+      set((s) => ({ extractors: s.extractors.filter((e) => e.id !== id) }))
+    } catch { toast.error('Failed to delete extractor') }
+  },
+
+  runExtractors: async (extractorIds, sourceIds) => {
+    const { activeCaseId } = get()
+    if (!activeCaseId) return
+    set({ isRunning: true, proposals: [], runLog: [] })
+    try {
+      const res = await fetch(`${API}/cases/${activeCaseId}/run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ extractorIds, sourceIds }),
+      })
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buf = ''
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buf += decoder.decode(value, { stream: true })
+        const lines = buf.split('\n')
+        buf = lines.pop()
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue
+          try {
+            const evt = JSON.parse(line.slice(6))
+            if (evt.type === 'done') {
+              set({ proposals: evt.proposals, isRunning: false })
+              toast.success(`Run complete — ${evt.total} proposals`)
+            } else if (evt.type === 'error') {
+              set((s) => ({ runLog: [...s.runLog, { level: 'error', msg: evt.message }] }))
+            } else if (evt.type === 'progress' || evt.type === 'stderr' || evt.type === 'warn') {
+              set((s) => ({ runLog: [...s.runLog, { level: evt.type, msg: evt.message }] }))
+            }
+          } catch { /* malformed SSE line */ }
+        }
+      }
+    } catch (err) {
+      toast.error('Run failed: ' + err.message)
+      set({ isRunning: false })
+    }
+  },
+
+  setProposalStatus: (id, status) =>
+    set((s) => ({ proposals: s.proposals.map((p) => p.id === id ? { ...p, status } : p) })),
+
+  setAllProposalsStatus: (status) =>
+    set((s) => ({ proposals: s.proposals.map((p) => ({ ...p, status })) })),
+
+  importProposals: () => {
+    const { proposals, nodes, edges } = get()
+    const accepted = proposals.filter((p) => p.status === 'accepted')
+    if (!accepted.length) { toast.warn('No proposals accepted'); return }
+
+    get()._pushHistory()
+
+    let newNodes = [...nodes]
+    let newEdges = [...edges]
+    let nodeCount = 0
+    let edgeCount = 0
+
+    for (const proposal of accepted) {
+      // Find or create primary node
+      const existing = newNodes.find(
+        (n) => n.data.nodeType === proposal.primaryNode.nodeType &&
+               n.data.value.toLowerCase() === proposal.primaryNode.value.toLowerCase()
+      )
+      let primaryId
+      if (existing) {
+        primaryId = existing.id
+      } else {
+          primaryId = `node_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`
+        newNodes.push({
+          id: primaryId,
+          type: 'osint',
+          position: { x: 100 + (nodeCount % 8) * 240, y: 100 + Math.floor(nodeCount / 8) * 160 },
+          data: {
+            nodeType: proposal.primaryNode.nodeType,
+            label: NODE_TYPE_CONFIG[proposal.primaryNode.nodeType]?.label ?? proposal.primaryNode.nodeType,
+            value: proposal.primaryNode.value,
+            note: `Imported from: ${proposal.sourceName}`,
+            sourceUrl: '',
+            confidence: 'unverified',
+            dateAdded: new Date().toISOString().slice(0, 10),
+            tags: '',
+            locked: false,
+            sourceIds: [],
+          },
+        })
+        nodeCount++
+      }
+
+      // Secondary nodes
+      for (const sec of proposal.secondaryNodes) {
+        const existingSec = newNodes.find(
+          (n) => n.data.nodeType === sec.nodeType &&
+                 n.data.value.toLowerCase() === sec.value.toLowerCase()
+        )
+        let secId
+        if (existingSec) {
+          secId = existingSec.id
+        } else {
+          secId = `node_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`
+          newNodes.push({
+            id: secId,
+            type: 'osint',
+            position: { x: 100 + (nodeCount % 8) * 240, y: 100 + Math.floor(nodeCount / 8) * 160 },
+            data: {
+              nodeType: sec.nodeType,
+              label: sec.nodeType,
+              value: sec.value,
+              note: `Detected from: ${proposal.sourceName}`,
+              sourceUrl: '', confidence: 'unverified',
+              dateAdded: new Date().toISOString().slice(0, 10),
+              tags: '', locked: false, sourceIds: [],
+            },
+          })
+          nodeCount++
+        }
+        // Create edge if not already there
+        const edgeExists = newEdges.some(
+          (e) => e.source === primaryId && e.target === secId
+        )
+        if (!edgeExists) {
+          newEdges.push({
+            id: `edge_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`,
+            source: primaryId,
+            target: secId,
+            type: 'osint',
+            data: { label: '', relationshipType: sec.relationship ?? 'default', confidence: 'unverified' },
+          })
+          edgeCount++
+        }
+      }
+    }
+
+    set({ nodes: newNodes, edges: newEdges, proposals: proposals.map((p) => p.status === 'accepted' ? { ...p, status: 'imported' } : p) })
+    toast.success(`Imported ${nodeCount} nodes, ${edgeCount} edges`)
+  },
 
   // ── canvas node/edge actions ───────────────────────────────────────────────
   onNodesChange: (changes) => set({ nodes: applyNodeChanges(changes, get().nodes) }),
