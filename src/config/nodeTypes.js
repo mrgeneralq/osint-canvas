@@ -63,7 +63,7 @@ export const PALETTE_GROUPS = [
 ]
 
 export const CONFIDENCE_LEVELS = {
-  unverified: { label: 'Unverified', color: '#6b7280', bg: '#1f2028' },
-  probable:   { label: 'Probable',   color: '#f59e0b', bg: '#2a2010' },
-  confirmed:  { label: 'Confirmed',  color: '#22c55e', bg: '#0f2a14' },
+  unverified: { label: 'Unverified', color: '#6b7280', bg: 'rgba(107,114,128,0.15)' },
+  probable:   { label: 'Probable',   color: '#f59e0b', bg: 'rgba(245,158,11,0.15)'  },
+  confirmed:  { label: 'Confirmed',  color: '#22c55e', bg: 'rgba(34,197,94,0.15)'   },
 }

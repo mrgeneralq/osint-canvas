@@ -426,7 +426,7 @@ function QuickAddMenu({ screenX, screenY, sourceNodeId, onSelect, onClose }) {
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = cfg.border; e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = 'none' }}
                 >
                   <span style={{ fontSize: 18, lineHeight: 1 }}>{cfg.icon}</span>
-                  <span style={{ fontSize: 8, color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.2 }}>{cfg.label}</span>
+                  <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.85)', textAlign: 'center', lineHeight: 1.2 }}>{cfg.label}</span>
                 </button>
               ))}
             </div>
