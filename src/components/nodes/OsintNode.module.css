@@ -86,7 +86,7 @@
   color: var(--text-primary); line-height: 1.5;
 }
 .valueInput::placeholder { color: var(--text-muted); }
-.valueInput:focus { color: #fff; }
+.valueInput:focus { color: var(--text-primary); }
 
 /* ── Image ── */
 .image { width: 100%; border-radius: 6px; margin-top: 4px; max-height: 180px; object-fit: cover; display: block; }

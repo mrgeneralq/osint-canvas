@@ -21,19 +21,19 @@
 
 /* ── Light theme ────────────────────────────────────────────────────────────── */
 [data-theme="light"] {
-  --bg-base:       #e8eaf2;
-  --bg-surface:    #f0f2f9;
-  --bg-elevated:   #dde0ef;
-  --bg-hover:      #d0d4e8;
-  --border-subtle: #bcc1d8;
-  --border-mid:    #9aa0c0;
-  --border-strong: #6b739e;
+  --bg-base:       #c4c8d8;
+  --bg-surface:    #d8dce8;
+  --bg-elevated:   #e8eaf6;
+  --bg-hover:      #cdd1e0;
+  --border-subtle: #a8aec4;
+  --border-mid:    #8890b0;
+  --border-strong: #6068a0;
   --accent:        #3a48d5;
   --accent-light:  #5b6af0;
   --text-primary:  #0c0f24;
   --text-secondary:#1e2450;
   --text-muted:    #3d4470;
-  --text-dimmed:   #6068a0;
+  --text-dimmed:   #5860a0;
   --danger:        #b91c1c;
   --danger-bg:     #fee2e2;
 }
