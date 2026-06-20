@@ -15,15 +15,29 @@ import ProposalPanel from './components/ProposalPanel'
 import useStore from './store/useStore'
 import styles from './App.module.css'
 
-function WorkspaceView() {
+const AUTOSAVE_DELAY = 3000
+
+function WorkspaceView({ theme, onToggleTheme }) {
   const exportRef = useRef(null)
   const [propsOpen, setPropsOpen] = useState(true)
   const [proposalsOpen, setProposalsOpen] = useState(false)
   const selectedNodeId = useStore((s) => s.selectedNodeId)
   const activeView = useStore((s) => s.activeView)
   const activeNoteId = useStore((s) => s.activeNoteId)
+  const nodes = useStore((s) => s.nodes)
+  const edges = useStore((s) => s.edges)
+  const isDirty = useStore((s) => s.isDirty)
+  const activeCaseId = useStore((s) => s.activeCaseId)
+  const saveCase = useStore((s) => s.saveCase)
 
   useEffect(() => { if (selectedNodeId) setPropsOpen(true) }, [selectedNodeId])
+
+  // Auto-save 3s after last change, but only when a case is open and canvas is dirty
+  useEffect(() => {
+    if (!activeCaseId || !isDirty) return
+    const t = setTimeout(() => saveCase(), AUTOSAVE_DELAY)
+    return () => clearTimeout(t)
+  }, [nodes, edges, isDirty, activeCaseId])
 
   const isSourcesView = activeView === 'sources'
 
@@ -34,6 +48,8 @@ function WorkspaceView() {
         canvasRef={exportRef}
         propsOpen={propsOpen}
         onToggleProps={() => setPropsOpen((v) => !v)}
+        theme={theme}
+        onToggleTheme={onToggleTheme}
       />
       <div className={styles.main}>
         <WorkspaceSidebar />
@@ -67,6 +83,15 @@ export default function App() {
   const importJSON = useStore((s) => s.importJSON)
   const loadCases = useStore((s) => s.loadCases)
 
+  // Theme — persisted to localStorage, applied to <html>
+  const [theme, setTheme] = useState(() => localStorage.getItem('osint-theme') ?? 'dark')
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem('osint-theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
+
   useEffect(() => {
     loadCases()
     const hash = window.location.hash
@@ -82,7 +107,7 @@ export default function App() {
   if (activeView === 'dashboard') {
     return (
       <>
-        <CaseDashboard />
+        <CaseDashboard theme={theme} onToggleTheme={toggleTheme} />
         <ToastContainer />
       </>
     )
@@ -90,7 +115,7 @@ export default function App() {
 
   return (
     <ReactFlowProvider>
-      <WorkspaceView />
+      <WorkspaceView theme={theme} onToggleTheme={toggleTheme} />
       <ToastContainer />
     </ReactFlowProvider>
   )

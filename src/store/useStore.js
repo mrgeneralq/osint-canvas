@@ -82,6 +82,8 @@ const useStore = create((set, get) => ({
   snapshots: JSON.parse(localStorage.getItem('osint-snapshots') ?? '[]'),
   filterSourceId: null,
   _savePending: false,
+  isDirty: false,
+  lastSavedAt: null,
 
   // ── workspace actions ─────────────────────────────────────────────────────
   loadCases: async () => {
@@ -157,7 +159,7 @@ const useStore = create((set, get) => ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...caseInfo, canvases: updatedCanvases, activeCanvasId, timelineEntries }),
       })
-      set({ canvases: updatedCanvases, _savePending: false })
+      set({ canvases: updatedCanvases, _savePending: false, isDirty: false, lastSavedAt: new Date() })
       toast.success('Case saved')
     } catch { toast.error('Failed to save case') }
   },
@@ -523,8 +525,8 @@ const useStore = create((set, get) => ({
   },
 
   // ── canvas node/edge actions ───────────────────────────────────────────────
-  onNodesChange: (changes) => set({ nodes: applyNodeChanges(changes, get().nodes) }),
-  onEdgesChange: (changes) => set({ edges: applyEdgeChanges(changes, get().edges) }),
+  onNodesChange: (changes) => set({ nodes: applyNodeChanges(changes, get().nodes), isDirty: true }),
+  onEdgesChange: (changes) => set({ edges: applyEdgeChanges(changes, get().edges), isDirty: true }),
 
   onConnect: (connection) => {
     get()._pushHistory()

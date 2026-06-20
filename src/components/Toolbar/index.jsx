@@ -12,10 +12,12 @@ import AiPromptModal from '../AiPromptModal'
 import SourcesModal from '../SourcesModal'
 import styles from './Toolbar.module.css'
 
-export default function Toolbar({ onExportPng, canvasRef, onToggleProps, propsOpen }) {
+export default function Toolbar({ onExportPng, canvasRef, onToggleProps, propsOpen, theme, onToggleTheme }) {
   const fileRef = useRef()
   const moreRef = useRef()
   const { exportJSON, importJSON, clearAll, searchTerm, setSearchTerm, caseInfo, undo, redo, saveCase } = useStore()
+  const isDirty = useStore((s) => s.isDirty)
+  const lastSavedAt = useStore((s) => s.lastSavedAt)
   const canUndo = useStore((s) => s.historyIndex > 0)
   const canRedo = useStore((s) => s.historyIndex < s.history.length - 1)
 
@@ -133,8 +135,21 @@ export default function Toolbar({ onExportPng, canvasRef, onToggleProps, propsOp
         <button className={styles.btn} onClick={saveCase} title="Save case to server (Ctrl+S)">
           💾 Save
         </button>
+        <span className={`${styles.saveStatus} ${isDirty ? styles.saveStatusDirty : styles.saveStatusSaved}`}
+          title={lastSavedAt ? `Last saved ${lastSavedAt.toLocaleTimeString()}` : ''}>
+          {isDirty ? '● unsaved' : lastSavedAt ? '✓ saved' : ''}
+        </span>
         <button className={styles.btn} onClick={exportJSON} title="Export canvas as JSON file">
           ⬇ Export
+        </button>
+
+        {/* Theme toggle */}
+        <button
+          className={styles.iconBtn}
+          onClick={onToggleTheme}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
         </button>
 
         {/* More dropdown */}

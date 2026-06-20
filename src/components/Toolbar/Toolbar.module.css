@@ -108,3 +108,13 @@
 .dropDanger:hover { background: var(--danger-bg) !important; }
 .dropIcon { font-size: 13px; width: 18px; text-align: center; flex-shrink: 0; }
 .dropSep { height: 1px; background: var(--border-subtle); margin: 3px 0; }
+
+.saveStatus {
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.3s;
+  flex-shrink: 0;
+}
+.saveStatusDirty { color: #f59e0b; }
+.saveStatusSaved { color: #4ade80; }

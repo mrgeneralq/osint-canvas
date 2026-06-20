@@ -1,5 +1,6 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Dark theme (default) ──────────────────────────────────────────────────── */
 :root {
   --bg-base:       #0f1117;
   --bg-surface:    #141720;
@@ -16,6 +17,25 @@
   --text-dimmed:   #4b5280;
   --danger:        #f87171;
   --danger-bg:     #3d1515;
+}
+
+/* ── Light theme ────────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-base:       #f0f2f8;
+  --bg-surface:    #ffffff;
+  --bg-elevated:   #e8ebf5;
+  --bg-hover:      #dde1f0;
+  --border-subtle: #d4d8ed;
+  --border-mid:    #b8bedd;
+  --border-strong: #8a93c4;
+  --accent:        #4f5fe8;
+  --accent-light:  #7c8cf8;
+  --text-primary:  #12152e;
+  --text-secondary:#2d3460;
+  --text-muted:    #5a607a;
+  --text-dimmed:   #8890b0;
+  --danger:        #dc2626;
+  --danger-bg:     #fef2f2;
 }
 
 html, body, #root {
@@ -44,3 +64,8 @@ html, body, #root {
 .react-flow__controls-button:hover { background: var(--bg-hover); }
 .react-flow__controls-button svg { fill: var(--text-secondary); }
 .react-flow__background { background: var(--bg-base); }
+
+/* Light mode React Flow dot grid needs a darker dot colour */
+[data-theme="light"] .react-flow__background pattern circle,
+[data-theme="light"] .react-flow__background pattern rect { fill: #b8bedd !important; }
+[data-theme="light"] .react-flow__minimap-mask { fill: rgba(240,242,248,0.75); }
