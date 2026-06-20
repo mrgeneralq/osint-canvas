@@ -14,9 +14,14 @@ export default function ContextMenu({ x, y, nodeId, onClose }) {
   const startPathPick = useStore((s) => s.startPathPick)
   const setHighlight = useStore((s) => s.setHighlight)
   const mergeNodes = useStore((s) => s.mergeNodes)
+  const subjects = useStore((s) => s.subjects)
+  const linkNodeToSubject = useStore((s) => s.linkNodeToSubject)
+  const setActiveView = useStore((s) => s.setActiveView)
   const edges = useStore((s) => s.edges)
   const [showMergePicker, setShowMergePicker] = useState(false)
   const [mergeSearch, setMergeSearch] = useState('')
+  const [showSubjectPicker, setShowSubjectPicker] = useState(false)
+  const [subjectSearch, setSubjectSearch] = useState('')
 
   const node = nodes.find((n) => n.id === nodeId)
   if (!node) return null
@@ -109,6 +114,44 @@ export default function ContextMenu({ x, y, nodeId, onClose }) {
                   </button>
                 )
               })}
+          </div>
+        </div>
+      )}
+
+      <div className={styles.sep} />
+      <Item icon="👤" label="Link to subject…" onClick={() => { setShowMergePicker(false); setShowSubjectPicker((v) => !v) }} />
+
+      {showSubjectPicker && (
+        <div className={styles.mergePicker}>
+          <input
+            autoFocus
+            className={styles.mergeSearch}
+            placeholder="Search subjects…"
+            value={subjectSearch}
+            onChange={(e) => setSubjectSearch(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <div className={styles.mergeList}>
+            {subjects.length === 0 && (
+              <button className={styles.mergeItem} onClick={() => { setActiveView('subjects'); onClose() }}>
+                <span>+</span>
+                <span className={styles.mergeItemVal}>Create a subject first…</span>
+              </button>
+            )}
+            {subjects
+              .filter((s) => !subjectSearch || s.name.toLowerCase().includes(subjectSearch.toLowerCase()))
+              .slice(0, 12)
+              .map((s) => (
+                <button
+                  key={s.id}
+                  className={`${styles.mergeItem} ${s.linkedNodeIds?.includes(nodeId) ? styles.mergeItemActive : ''}`}
+                  onClick={() => { linkNodeToSubject(s.id, nodeId); onClose() }}
+                >
+                  <span>{s.type === 'organization' ? '🏢' : s.type === 'asset' ? '🎯' : '👤'}</span>
+                  <span className={styles.mergeItemVal}>{s.name || 'Unnamed subject'}</span>
+                  {s.linkedNodeIds?.includes(nodeId) && <span style={{ fontSize: 9, color: 'var(--accent)', marginLeft: 'auto' }}>linked</span>}
+                </button>
+              ))}
           </div>
         </div>
       )}

@@ -50,6 +50,11 @@
 .navItemActive { background: rgba(124,140,248,0.12) !important; color: var(--accent) !important; }
 .navIcon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
 .navLabel { flex: 1; }
+.navCount {
+  font-size: 10px; font-weight: 700; min-width: 18px; text-align: center;
+  background: rgba(124,140,248,0.15); color: var(--accent);
+  border-radius: 10px; padding: 1px 6px; flex-shrink: 0;
+}
 
 /* ── Section toggles ── */
 .sectionToggle {

@@ -59,6 +59,9 @@ const useStore = create((set, get) => ({
   timelineEntries: [],
   caseInfo: { name: '', investigator: '', status: 'Active', description: '', target: '', tags: '' },
 
+  // ── subjects ──────────────────────────────────────────────────────────────
+  subjects: [],
+
   // ── intelligence sources ──────────────────────────────────────────────────
   sourceFiles: [],
   extractors: [],
@@ -134,6 +137,7 @@ const useStore = create((set, get) => ({
         nodes: canvas?.nodes ?? [],
         edges: canvas?.edges ?? [],
         sources: canvas?.sources ?? [],
+        subjects: data.subjects ?? [],
         timelineEntries: data.timelineEntries ?? [],
         sourceFiles: data.sourceFiles ?? [],
         extractors: data.extractors ?? [],
@@ -148,7 +152,7 @@ const useStore = create((set, get) => ({
   },
 
   saveCase: async () => {
-    const { activeCaseId, canvases, activeCanvasId, nodes, edges, sources, caseInfo, timelineEntries } = get()
+    const { activeCaseId, canvases, activeCanvasId, nodes, edges, sources, caseInfo, timelineEntries, subjects } = get()
     if (!activeCaseId) return
     const updatedCanvases = canvases.map((c) =>
       c.id === activeCanvasId ? { ...c, nodes, edges, sources } : c
@@ -157,7 +161,7 @@ const useStore = create((set, get) => ({
       await fetch(`${API}/cases/${activeCaseId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...caseInfo, canvases: updatedCanvases, activeCanvasId, timelineEntries }),
+        body: JSON.stringify({ ...caseInfo, canvases: updatedCanvases, activeCanvasId, timelineEntries, subjects }),
       })
       set({ canvases: updatedCanvases, _savePending: false, isDirty: false, lastSavedAt: new Date() })
       toast.success('Case saved')
@@ -182,6 +186,7 @@ const useStore = create((set, get) => ({
       canvases: [],
       activeCanvasId: null,
       notes: [],
+      subjects: [],
       nodes: [],
       edges: [],
       sources: [],
@@ -192,6 +197,58 @@ const useStore = create((set, get) => ({
   },
 
   setActiveView: (view, noteId = null) => set({ activeView: view, activeNoteId: noteId }),
+
+  // ── subject actions ───────────────────────────────────────────────────────
+  addSubject: (fields = {}) => {
+    const id = `subj_${Date.now()}`
+    const subject = {
+      id,
+      type: 'person',
+      name: '',
+      aliases: [],
+      dob: '',
+      nationality: '',
+      gender: '',
+      orgType: '',
+      country: '',
+      description: '',
+      photoUrl: '',
+      linkedNodeIds: [],
+      createdAt: new Date().toISOString(),
+      ...fields,
+    }
+    set((s) => ({ subjects: [...s.subjects, subject], isDirty: true }))
+    return id
+  },
+
+  updateSubject: (id, patch) =>
+    set((s) => ({
+      subjects: s.subjects.map((sub) => sub.id === id ? { ...sub, ...patch } : sub),
+      isDirty: true,
+    })),
+
+  deleteSubject: (id) =>
+    set((s) => ({ subjects: s.subjects.filter((sub) => sub.id !== id), isDirty: true })),
+
+  linkNodeToSubject: (subjectId, nodeId) =>
+    set((s) => ({
+      subjects: s.subjects.map((sub) =>
+        sub.id === subjectId
+          ? { ...sub, linkedNodeIds: sub.linkedNodeIds.includes(nodeId) ? sub.linkedNodeIds : [...sub.linkedNodeIds, nodeId] }
+          : sub
+      ),
+      isDirty: true,
+    })),
+
+  unlinkNodeFromSubject: (subjectId, nodeId) =>
+    set((s) => ({
+      subjects: s.subjects.map((sub) =>
+        sub.id === subjectId
+          ? { ...sub, linkedNodeIds: sub.linkedNodeIds.filter((n) => n !== nodeId) }
+          : sub
+      ),
+      isDirty: true,
+    })),
 
   // ── canvas management ─────────────────────────────────────────────────────
   addCanvas: () => {

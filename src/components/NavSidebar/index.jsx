@@ -114,7 +114,8 @@ export default function NavSidebar({ theme, onToggleTheme }) {
   const activeCanvasId = useStore((s) => s.activeCanvasId)
   const activeView = useStore((s) => s.activeView)
   const activeNoteId = useStore((s) => s.activeNoteId)
-  const notes = useStore((s) => s.notes)
+  const notes    = useStore((s) => s.notes)
+  const subjects = useStore((s) => s.subjects)
   const switchCanvas = useStore((s) => s.switchCanvas)
   const addCanvas = useStore((s) => s.addCanvas)
   const renameCanvas = useStore((s) => s.renameCanvas)
@@ -148,7 +149,7 @@ export default function NavSidebar({ theme, onToggleTheme }) {
     setRenamingId(null)
   }
 
-  const navItem = (icon, label, view, noteId) => {
+  const navItem = (icon, label, view, noteId, count) => {
     const active = activeView === view && (!noteId || activeNoteId === noteId)
     return (
       <button
@@ -158,6 +159,7 @@ export default function NavSidebar({ theme, onToggleTheme }) {
       >
         <span className={styles.navIcon}>{icon}</span>
         <span className={styles.navLabel}>{label}</span>
+        {count > 0 && <span className={styles.navCount}>{count}</span>}
       </button>
     )
   }
@@ -227,7 +229,7 @@ export default function NavSidebar({ theme, onToggleTheme }) {
 
         {/* Workspace views */}
         <div className={styles.navSection}>
-          {navItem('👤', 'Subjects', 'subjects')}
+          {navItem('👤', 'Subjects', 'subjects', null, subjects.length)}
           {navItem('📁', 'Evidence', 'evidence')}
           {navItem('📡', 'Intel Feed', 'intel')}
           {navItem('✅', 'Tasks', 'tasks')}
