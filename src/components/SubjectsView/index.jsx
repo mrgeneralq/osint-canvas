@@ -3,72 +3,71 @@ import useStore from '../../store/useStore'
 import { NODE_TYPE_CONFIG } from '../../config/nodeTypes'
 import styles from './SubjectsView.module.css'
 
+// ── Config ────────────────────────────────────────────────────────────────────
+
 const TYPE_OPTIONS = [
   { value: 'person',       label: 'Person',       icon: '👤' },
   { value: 'organization', label: 'Organization', icon: '🏢' },
   { value: 'asset',        label: 'Asset',        icon: '🎯' },
 ]
 
-const FIELDS = {
-  person:       [
-    { key: 'dob',        label: 'Date of birth', placeholder: 'YYYY-MM-DD' },
-    { key: 'nationality',label: 'Nationality',   placeholder: 'e.g. American' },
-    { key: 'gender',     label: 'Gender',        placeholder: '' },
-    { key: 'occupation', label: 'Occupation',    placeholder: '' },
-  ],
-  organization: [
-    { key: 'orgType',    label: 'Type',          placeholder: 'Corporation, NGO…' },
-    { key: 'country',    label: 'Country',       placeholder: '' },
-    { key: 'founded',    label: 'Founded',       placeholder: 'YYYY' },
-    { key: 'industry',   label: 'Industry',      placeholder: '' },
-  ],
-  asset: [
-    { key: 'assetType',  label: 'Asset type',    placeholder: 'Domain, Vehicle…' },
-    { key: 'identifier', label: 'Identifier',    placeholder: 'IP, VIN, URL…' },
-    { key: 'owner',      label: 'Owner',         placeholder: '' },
-    { key: 'assetStatus',label: 'Status',        placeholder: 'Active / Inactive' },
-  ],
+const ROLES = {
+  target:    { label: 'Primary Target',      color: '#ef4444', bg: 'rgba(239,68,68,0.12)'    },
+  poi:       { label: 'Person of Interest',  color: '#f97316', bg: 'rgba(249,115,22,0.12)'   },
+  associate: { label: 'Associate',           color: '#3b82f6', bg: 'rgba(59,130,246,0.12)'   },
+  witness:   { label: 'Witness',             color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)'   },
+  unknown:   { label: 'Unknown role',        color: '#6b7280', bg: 'rgba(107,114,128,0.12)'  },
 }
 
-// ── Subject list card ─────────────────────────────────────────────────────────
-function SubjectCard({ subject, active, onClick }) {
-  const cfg = TYPE_OPTIONS.find((t) => t.value === subject.type) ?? TYPE_OPTIONS[0]
-  const initials = subject.name ? subject.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase() : '?'
-
-  return (
-    <div className={`${styles.card} ${active ? styles.cardActive : ''}`} onClick={onClick}>
-      <div className={styles.cardAvatar}>
-        {subject.photoUrl
-          ? <img src={subject.photoUrl} alt="" className={styles.cardAvatarImg} />
-          : <div className={styles.cardAvatarInitials} style={{ background: subjectColor(subject.id) }}>
-              {initials}
-            </div>
-        }
-        <span className={styles.cardTypeIcon}>{cfg.icon}</span>
-      </div>
-      <div className={styles.cardInfo}>
-        <div className={styles.cardName}>{subject.name || <span className={styles.unnamed}>Unnamed {cfg.label}</span>}</div>
-        <div className={styles.cardMeta}>
-          {subject.dob && <span>{subject.dob}</span>}
-          {subject.nationality && <span>{subject.nationality}</span>}
-          {subject.orgType && <span>{subject.orgType}</span>}
-          {subject.assetType && <span>{subject.assetType}</span>}
-        </div>
-        {subject.aliases?.length > 0 && (
-          <div className={styles.cardAliases}>
-            aka {subject.aliases.slice(0, 3).join(' · ')}
-          </div>
-        )}
-      </div>
-      {subject.linkedNodeIds?.length > 0 && (
-        <div className={styles.cardNodes}>
-          <span className={styles.cardNodesBadge}>{subject.linkedNodeIds.length}</span>
-          <span className={styles.cardNodesLabel}>nodes</span>
-        </div>
-      )}
-    </div>
-  )
+const PRIORITIES = {
+  critical: { label: 'Critical', color: '#ef4444' },
+  high:     { label: 'High',     color: '#f97316' },
+  medium:   { label: 'Medium',   color: '#f59e0b' },
+  low:      { label: 'Low',      color: '#6b7280' },
 }
+
+const PLATFORMS = [
+  { value: 'twitter',   label: 'X / Twitter',  icon: '𝕏',   base: 'https://x.com/' },
+  { value: 'telegram',  label: 'Telegram',     icon: '✈',   base: 'https://t.me/' },
+  { value: 'instagram', label: 'Instagram',    icon: '📷',  base: 'https://instagram.com/' },
+  { value: 'facebook',  label: 'Facebook',     icon: '𝒻',   base: 'https://facebook.com/' },
+  { value: 'linkedin',  label: 'LinkedIn',     icon: 'in',  base: 'https://linkedin.com/in/' },
+  { value: 'tiktok',    label: 'TikTok',       icon: '♪',   base: 'https://tiktok.com/@' },
+  { value: 'discord',   label: 'Discord',      icon: '☁',   base: '' },
+  { value: 'reddit',    label: 'Reddit',       icon: '🔴',  base: 'https://reddit.com/u/' },
+  { value: 'github',    label: 'GitHub',       icon: '⌥',   base: 'https://github.com/' },
+  { value: 'email',     label: 'Email',        icon: '✉',   base: 'mailto:' },
+  { value: 'phone',     label: 'Phone',        icon: '☎',   base: '' },
+  { value: 'custom',    label: 'Other',        icon: '🔗',  base: '' },
+]
+
+const PERSON_FIELDS = [
+  { key: 'dob',        label: 'Date of birth',  placeholder: 'YYYY-MM-DD', span: 1 },
+  { key: 'nationality',label: 'Nationality',    placeholder: 'e.g. American', span: 1 },
+  { key: 'gender',     label: 'Gender',         placeholder: '', span: 1 },
+  { key: 'occupation', label: 'Occupation',     placeholder: '', span: 1 },
+]
+const PERSON_PHYSICAL = [
+  { key: 'height',   label: 'Height',      placeholder: 'e.g. 180 cm' },
+  { key: 'build',    label: 'Build',       placeholder: 'Slim / Athletic…' },
+  { key: 'eyeColor', label: 'Eye colour',  placeholder: '' },
+  { key: 'hairColor',label: 'Hair colour', placeholder: '' },
+  { key: 'marks',    label: 'Distinguishing marks', placeholder: 'Tattoos, scars…' },
+]
+const ORG_FIELDS = [
+  { key: 'orgType',  label: 'Type',     placeholder: 'Corporation, NGO…' },
+  { key: 'country',  label: 'Country',  placeholder: '' },
+  { key: 'founded',  label: 'Founded',  placeholder: 'YYYY' },
+  { key: 'industry', label: 'Industry', placeholder: '' },
+]
+const ASSET_FIELDS = [
+  { key: 'assetType',   label: 'Asset type',  placeholder: 'Domain, Vehicle…' },
+  { key: 'identifier',  label: 'Identifier',  placeholder: 'IP, VIN, URL…' },
+  { key: 'owner',       label: 'Owner',       placeholder: '' },
+  { key: 'assetStatus', label: 'Status',      placeholder: 'Active / Inactive' },
+]
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function subjectColor(id) {
   const colors = ['#4f46e5','#0891b2','#059669','#d97706','#dc2626','#7c3aed','#db2777']
@@ -76,17 +75,174 @@ function subjectColor(id) {
   return colors[Math.abs(h) % colors.length]
 }
 
-// ── Subject detail ────────────────────────────────────────────────────────────
+function computeCompleteness(subject) {
+  const checks = [
+    subject.name,
+    subject.aliases?.length > 0,
+    subject.description,
+    subject.role !== 'unknown',
+    subject.onlinePresence?.length > 0,
+    subject.linkedNodeIds?.length > 0,
+    subject.type === 'person'       ? (subject.dob || subject.nationality || subject.occupation) : true,
+    subject.type === 'organization' ? (subject.orgType || subject.country) : true,
+    subject.type === 'asset'        ? (subject.assetType || subject.identifier) : true,
+  ]
+  const done = checks.filter(Boolean).length
+  return Math.round((done / checks.length) * 100)
+}
+
+// ── List card ─────────────────────────────────────────────────────────────────
+
+function SubjectCard({ subject, active, onClick }) {
+  const role     = ROLES[subject.role]     ?? ROLES.unknown
+  const priority = PRIORITIES[subject.priority] ?? PRIORITIES.medium
+  const pct      = computeCompleteness(subject)
+  const initials = subject.name
+    ? subject.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+    : (subject.type === 'organization' ? '🏢' : subject.type === 'asset' ? '🎯' : '?')
+
+  return (
+    <div className={`${styles.card} ${active ? styles.cardActive : ''}`} onClick={onClick}>
+      {/* Priority stripe */}
+      <div className={styles.cardStripe} style={{ background: priority.color }} />
+
+      <div className={styles.cardAvatar}>
+        {subject.photoUrl
+          ? <img src={subject.photoUrl} alt="" className={styles.cardAvatarImg} />
+          : <div className={styles.cardAvatarInitials} style={{ background: subjectColor(subject.id) }}>{initials}</div>
+        }
+      </div>
+
+      <div className={styles.cardBody}>
+        <div className={styles.cardTop}>
+          <span className={styles.cardName}>{subject.name || <em className={styles.unnamed}>Unnamed {TYPE_OPTIONS.find(t=>t.value===subject.type)?.label}</em>}</span>
+          <span className={styles.roleBadge} style={{ color: role.color, background: role.bg }}>{role.label}</span>
+        </div>
+        <div className={styles.cardMeta}>
+          {subject.nationality && <span>{subject.nationality}</span>}
+          {subject.dob         && <span>{subject.dob}</span>}
+          {subject.orgType     && <span>{subject.orgType}</span>}
+          {subject.assetType   && <span>{subject.assetType}</span>}
+          {subject.aliases?.length > 0 && <span>aka {subject.aliases[0]}{subject.aliases.length > 1 ? ` +${subject.aliases.length-1}` : ''}</span>}
+        </div>
+        {/* Completeness bar */}
+        <div className={styles.completenessBar}>
+          <div className={styles.completenessBarFill} style={{ width: `${pct}%` }} />
+        </div>
+        <div className={styles.cardFoot}>
+          <span className={styles.completenessPct}>{pct}% complete</span>
+          {subject.onlinePresence?.length > 0 && <span className={styles.cardStat}>🌐 {subject.onlinePresence.length}</span>}
+          {subject.linkedNodeIds?.length  > 0 && <span className={styles.cardStat}>🔗 {subject.linkedNodeIds.length}</span>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Detail ────────────────────────────────────────────────────────────────────
+
+function Field({ label, value, placeholder, onChange, span }) {
+  return (
+    <label className={`${styles.field} ${span === 2 ? styles.fieldSpan2 : ''}`}>
+      <span className={styles.fieldLabel}>{label}</span>
+      <input className={styles.fieldInput} value={value ?? ''} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
+    </label>
+  )
+}
+
+function OnlinePresenceTab({ subject, update }) {
+  const [adding, setAdding] = useState(false)
+  const [newPlatform, setNewPlatform] = useState('twitter')
+  const [newHandle, setNewHandle] = useState('')
+  const [newUrl, setNewUrl] = useState('')
+
+  const presence = subject.onlinePresence ?? []
+
+  const addEntry = () => {
+    if (!newHandle.trim()) return
+    const plat = PLATFORMS.find(p => p.value === newPlatform)
+    const url  = newUrl.trim() || (plat?.base ? plat.base + newHandle.trim().replace(/^@/, '') : '')
+    update({ onlinePresence: [...presence, { id: `op_${Date.now()}`, platform: newPlatform, handle: newHandle.trim(), url }] })
+    setNewHandle(''); setNewUrl(''); setAdding(false)
+  }
+
+  const remove = (id) => update({ onlinePresence: presence.filter(e => e.id !== id) })
+
+  return (
+    <div className={styles.onlineTab}>
+      {presence.length === 0 && !adding && (
+        <div className={styles.onlineEmpty}>
+          <div className={styles.onlineEmptyIcon}>🌐</div>
+          <div className={styles.onlineEmptyText}>No online presence recorded</div>
+          <div className={styles.onlineEmptyHint}>Add social media accounts, email addresses, phone numbers, and other online identifiers</div>
+        </div>
+      )}
+
+      <div className={styles.onlineList}>
+        {presence.map(entry => {
+          const plat = PLATFORMS.find(p => p.value === entry.platform) ?? PLATFORMS[PLATFORMS.length - 1]
+          return (
+            <div key={entry.id} className={styles.onlineEntry}>
+              <div className={styles.onlineEntryIcon}>{plat.icon}</div>
+              <div className={styles.onlineEntryInfo}>
+                <div className={styles.onlineEntryPlatform}>{plat.label}</div>
+                <div className={styles.onlineEntryHandle}>{entry.handle}</div>
+              </div>
+              {entry.url && (
+                <a href={entry.url} target="_blank" rel="noreferrer" className={styles.onlineEntryLink} onClick={e => e.stopPropagation()}>
+                  ↗ Open
+                </a>
+              )}
+              <button className={styles.onlineEntryRemove} onClick={() => remove(entry.id)}>✕</button>
+            </div>
+          )
+        })}
+      </div>
+
+      {adding ? (
+        <div className={styles.onlineAddForm}>
+          <div className={styles.onlineAddRow}>
+            <select className={styles.onlineSelect} value={newPlatform} onChange={e => setNewPlatform(e.target.value)}>
+              {PLATFORMS.map(p => <option key={p.value} value={p.value}>{p.icon} {p.label}</option>)}
+            </select>
+            <input
+              className={styles.onlineHandleInput}
+              value={newHandle}
+              onChange={e => setNewHandle(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && addEntry()}
+              placeholder="Handle / username / number…"
+              autoFocus
+            />
+          </div>
+          <input
+            className={styles.onlineUrlInput}
+            value={newUrl}
+            onChange={e => setNewUrl(e.target.value)}
+            placeholder="URL (optional — auto-generated for known platforms)"
+          />
+          <div className={styles.onlineAddActions}>
+            <button className={styles.onlineAddSave} onClick={addEntry}>Save</button>
+            <button className={styles.onlineAddCancel} onClick={() => { setAdding(false); setNewHandle(''); setNewUrl('') }}>Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <button className={styles.onlineAddBtn} onClick={() => setAdding(true)}>+ Add account / identifier</button>
+      )}
+    </div>
+  )
+}
+
 function SubjectDetail({ subject, onDelete }) {
-  const updateSubject  = useStore((s) => s.updateSubject)
-  const nodes          = useStore((s) => s.nodes)
-  const unlinkNode     = useStore((s) => s.unlinkNodeFromSubject)
-  const setActiveView  = useStore((s) => s.setActiveView)
+  const updateSubject = useStore(s => s.updateSubject)
+  const nodes         = useStore(s => s.nodes)
+  const unlinkNode    = useStore(s => s.unlinkNodeFromSubject)
+  const setActiveView = useStore(s => s.setActiveView)
   const [aliasInput, setAliasInput] = useState('')
   const [activeTab, setActiveTab]   = useState('identity')
+  const [physOpen, setPhysOpen]     = useState(false)
   const aliasRef = useRef()
 
-  const update = (patch) => updateSubject(subject.id, patch)
+  const update = patch => updateSubject(subject.id, patch)
 
   const addAlias = () => {
     const val = aliasInput.trim(); if (!val) return
@@ -95,26 +251,34 @@ function SubjectDetail({ subject, onDelete }) {
     aliasRef.current?.focus()
   }
 
-  const linkedNodes = nodes.filter((n) => subject.linkedNodeIds?.includes(n.id))
-  const fields = FIELDS[subject.type] ?? FIELDS.person
-  const cfg = TYPE_OPTIONS.find((t) => t.value === subject.type) ?? TYPE_OPTIONS[0]
-  const initials = subject.name ? subject.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase() : '?'
+  const linkedNodes  = nodes.filter(n => subject.linkedNodeIds?.includes(n.id))
+  const role         = ROLES[subject.role]         ?? ROLES.unknown
+  const priority     = PRIORITIES[subject.priority] ?? PRIORITIES.medium
+  const pct          = computeCompleteness(subject)
+  const initials     = subject.name
+    ? subject.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    : '?'
+
+  const identityFields   = subject.type === 'organization' ? ORG_FIELDS : subject.type === 'asset' ? ASSET_FIELDS : PERSON_FIELDS
+
+  const TABS = [
+    { id: 'identity', label: 'Identity' },
+    { id: 'online',   label: 'Online',  count: subject.onlinePresence?.length },
+    { id: 'notes',    label: 'Notes' },
+    { id: 'nodes',    label: 'Canvas',  count: linkedNodes.length },
+  ]
 
   return (
     <div className={styles.detail}>
-      {/* Header band */}
+      {/* ── Header ── */}
       <div className={styles.detailHeader}>
         <div className={styles.detailAvatarWrap}>
           {subject.photoUrl
             ? <img src={subject.photoUrl} alt="" className={styles.detailAvatar} />
-            : <div className={styles.detailAvatarInitials} style={{ background: subjectColor(subject.id) }}>
-                {initials}
-              </div>
+            : <div className={styles.detailAvatarInitials} style={{ background: subjectColor(subject.id) }}>{initials}</div>
           }
-          <button
-            className={styles.avatarEditBtn}
-            onClick={() => { const url = window.prompt('Photo URL:', subject.photoUrl ?? ''); if (url !== null) update({ photoUrl: url }) }}
-            title="Set photo URL"
+          <button className={styles.avatarEditBtn}
+            onClick={() => { const u = window.prompt('Photo URL:', subject.photoUrl ?? ''); if (u !== null) update({ photoUrl: u }) }}
           >✎</button>
         </div>
 
@@ -122,28 +286,59 @@ function SubjectDetail({ subject, onDelete }) {
           <input
             className={styles.detailName}
             value={subject.name}
-            onChange={(e) => update({ name: e.target.value })}
+            onChange={e => update({ name: e.target.value })}
             placeholder="Subject name…"
           />
-          <div className={styles.detailTypeRow}>
-            {TYPE_OPTIONS.map((t) => (
-              <button
-                key={t.value}
-                className={`${styles.typeChip} ${subject.type === t.value ? styles.typeChipActive : ''}`}
-                onClick={() => update({ type: t.value })}
-              >
-                {t.icon} {t.label}
-              </button>
-            ))}
+
+          {/* Role + Priority row */}
+          <div className={styles.detailBadgeRow}>
+            <div className={styles.roleSelect}>
+              {Object.entries(ROLES).map(([key, r]) => (
+                <button
+                  key={key}
+                  className={`${styles.roleOption} ${subject.role === key ? styles.roleOptionActive : ''}`}
+                  style={subject.role === key ? { color: r.color, background: r.bg, borderColor: r.color + '60' } : {}}
+                  onClick={() => update({ role: key })}
+                >{r.label}</button>
+              ))}
+            </div>
+            <div className={styles.prioritySelect}>
+              {Object.entries(PRIORITIES).map(([key, p]) => (
+                <button
+                  key={key}
+                  className={`${styles.priorityDot} ${subject.priority === key ? styles.priorityDotActive : ''}`}
+                  style={{ '--dot-color': p.color }}
+                  title={p.label}
+                  onClick={() => update({ priority: key })}
+                >{p.label}</button>
+              ))}
+            </div>
           </div>
-          {subject.aliases?.length > 0 && (
+
+          {/* Completeness */}
+          <div className={styles.detailCompletenessRow}>
+            <div className={styles.detailCompletenessBar}>
+              <div className={styles.detailCompleteFill} style={{ width: `${pct}%`, background: pct >= 80 ? '#22c55e' : pct >= 50 ? '#f59e0b' : 'var(--accent)' }} />
+            </div>
+            <span className={styles.detailCompletePct}>{pct}% complete</span>
+          </div>
+
+          {/* Aliases inline */}
+          {(subject.aliases?.length > 0 || true) && (
             <div className={styles.detailAliasRow}>
-              {subject.aliases.map((a) => (
+              {(subject.aliases ?? []).map(a => (
                 <span key={a} className={styles.detailAlias}>
-                  {a}
-                  <button className={styles.aliasX} onClick={() => update({ aliases: subject.aliases.filter((x) => x !== a) })}>✕</button>
+                  {a}<button className={styles.aliasX} onClick={() => update({ aliases: subject.aliases.filter(x => x !== a) })}>✕</button>
                 </span>
               ))}
+              <input
+                ref={aliasRef}
+                className={styles.aliasInlineInput}
+                value={aliasInput}
+                onChange={e => setAliasInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addAlias()}
+                placeholder={subject.aliases?.length ? '+ alias…' : '+ Add alias…'}
+              />
             </div>
           )}
         </div>
@@ -151,91 +346,97 @@ function SubjectDetail({ subject, onDelete }) {
         <button className={styles.deleteBtn} onClick={onDelete} title="Delete subject">🗑</button>
       </div>
 
-      {/* Tab bar */}
+      {/* ── Tabs ── */}
       <div className={styles.tabs}>
-        {[['identity','Identity'],['notes','Notes'],['nodes','Canvas nodes']].map(([tab, label]) => (
-          <button
-            key={tab}
-            className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {label}
-            {tab === 'nodes' && linkedNodes.length > 0 && (
-              <span className={styles.tabBadge}>{linkedNodes.length}</span>
-            )}
+        {TABS.map(t => (
+          <button key={t.id} className={`${styles.tab} ${activeTab === t.id ? styles.tabActive : ''}`} onClick={() => setActiveTab(t.id)}>
+            {t.label}
+            {t.count > 0 && <span className={styles.tabBadge}>{t.count}</span>}
           </button>
         ))}
+        <div className={styles.tabSpacer} />
+        <button className={styles.deleteTabBtn} onClick={onDelete}>Delete subject</button>
       </div>
 
-      {/* Tab content */}
+      {/* ── Tab content ── */}
       <div className={styles.tabContent}>
+
+        {/* Identity */}
         {activeTab === 'identity' && (
           <div className={styles.identityTab}>
-            <div className={styles.fieldGrid}>
-              {fields.map(({ key, label, placeholder }) => (
-                <label key={key} className={styles.field}>
-                  <span className={styles.fieldLabel}>{label}</span>
-                  <input
-                    className={styles.fieldInput}
-                    value={subject[key] ?? ''}
-                    onChange={(e) => update({ [key]: e.target.value })}
-                    placeholder={placeholder}
-                  />
-                </label>
-              ))}
-            </div>
-
             <div className={styles.fieldSection}>
-              <span className={styles.fieldSectionLabel}>Aliases / handles</span>
-              <div className={styles.aliasList}>
-                {(subject.aliases ?? []).length === 0 && (
-                  <span className={styles.noAliases}>None added yet</span>
-                )}
-                {(subject.aliases ?? []).map((alias) => (
-                  <span key={alias} className={styles.aliasBadge}>
-                    {alias}
-                    <button className={styles.aliasX} onClick={() => update({ aliases: subject.aliases.filter((a) => a !== alias) })}>✕</button>
-                  </span>
+              <div className={styles.fieldSectionLabel}>Basic information</div>
+              <div className={styles.fieldGrid}>
+                {identityFields.map(f => (
+                  <Field key={f.key} label={f.label} value={subject[f.key]} placeholder={f.placeholder} onChange={v => update({ [f.key]: v })} />
                 ))}
               </div>
-              <div className={styles.aliasInputRow}>
-                <input
-                  ref={aliasRef}
-                  className={styles.aliasInput}
-                  value={aliasInput}
-                  onChange={(e) => setAliasInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') addAlias() }}
-                  placeholder="Add alias or online handle…"
-                />
-                <button className={styles.aliasAdd} onClick={addAlias}>Add</button>
+            </div>
+
+            {subject.type === 'person' && (
+              <div className={styles.fieldSection}>
+                <button className={styles.collapsibleHeader} onClick={() => setPhysOpen(v => !v)}>
+                  <span className={styles.collapsibleArrow}>{physOpen ? '▾' : '▸'}</span>
+                  Physical description
+                  {!physOpen && PERSON_PHYSICAL.some(f => subject[f.key]) && (
+                    <span className={styles.collapsibleFilled}>●</span>
+                  )}
+                </button>
+                {physOpen && (
+                  <div className={styles.fieldGrid}>
+                    {PERSON_PHYSICAL.map(f => (
+                      <Field key={f.key} label={f.label} value={subject[f.key]} placeholder={f.placeholder} onChange={v => update({ [f.key]: v })} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className={styles.fieldSection}>
+              <div className={styles.fieldSectionLabel}>Type</div>
+              <div className={styles.typeChips}>
+                {TYPE_OPTIONS.map(t => (
+                  <button
+                    key={t.value}
+                    className={`${styles.typeChip} ${subject.type === t.value ? styles.typeChipActive : ''}`}
+                    onClick={() => update({ type: t.value })}
+                  >{t.icon} {t.label}</button>
+                ))}
               </div>
             </div>
           </div>
         )}
 
+        {/* Online presence */}
+        {activeTab === 'online' && (
+          <OnlinePresenceTab subject={subject} update={update} />
+        )}
+
+        {/* Notes */}
         {activeTab === 'notes' && (
           <div className={styles.notesTab}>
             <textarea
               className={styles.notesArea}
               value={subject.description ?? ''}
-              onChange={(e) => update({ description: e.target.value })}
-              placeholder="Background, findings, open questions, behavioural patterns…"
+              onChange={e => update({ description: e.target.value })}
+              placeholder="Background, findings, behavioural patterns, open questions, source notes…"
             />
           </div>
         )}
 
+        {/* Canvas nodes */}
         {activeTab === 'nodes' && (
           <div className={styles.nodesTab}>
             {linkedNodes.length === 0 ? (
               <div className={styles.nodesEmpty}>
                 <div className={styles.nodesEmptyIcon}>🔗</div>
                 <div className={styles.nodesEmptyText}>No canvas nodes linked</div>
-                <div className={styles.nodesEmptyHint}>Right-click any node on the canvas → "Link to subject"</div>
+                <div className={styles.nodesEmptyHint}>Right-click any node → "Link to subject…"</div>
                 <button className={styles.nodesEmptyBtn} onClick={() => setActiveView('canvas')}>Open Canvas</button>
               </div>
             ) : (
               <div className={styles.nodesList}>
-                {linkedNodes.map((node) => {
+                {linkedNodes.map(node => {
                   const ncfg = NODE_TYPE_CONFIG[node.data?.nodeType] ?? {}
                   return (
                     <div key={node.id} className={styles.nodeItem}>
@@ -244,10 +445,11 @@ function SubjectDetail({ subject, onDelete }) {
                         <div className={styles.nodeItemValue}>{node.data?.value || ncfg.label || '—'}</div>
                         <div className={styles.nodeItemType}>{ncfg.label}</div>
                       </div>
-                      <button className={styles.nodeItemGo} onClick={() => { setActiveView('canvas'); setTimeout(() => useStore.getState().setSelectedNodeId(node.id), 150) }}>
+                      <button className={styles.nodeItemGo}
+                        onClick={() => { setActiveView('canvas'); setTimeout(() => useStore.getState().setSelectedNodeId(node.id), 150) }}>
                         → Canvas
                       </button>
-                      <button className={styles.nodeItemUnlink} onClick={() => unlinkNode(subject.id, node.id)} title="Unlink">✕</button>
+                      <button className={styles.nodeItemUnlink} onClick={() => unlinkNode(subject.id, node.id)}>✕</button>
                     </div>
                   )
                 })}
@@ -261,33 +463,29 @@ function SubjectDetail({ subject, onDelete }) {
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
+
 export default function SubjectsView() {
-  const subjects      = useStore((s) => s.subjects)
-  const addSubject    = useStore((s) => s.addSubject)
-  const deleteSubject = useStore((s) => s.deleteSubject)
+  const subjects      = useStore(s => s.subjects)
+  const addSubject    = useStore(s => s.addSubject)
+  const deleteSubject = useStore(s => s.deleteSubject)
   const [selectedId, setSelectedId] = useState(null)
   const [search, setSearch]         = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
+  const [roleFilter, setRoleFilter] = useState('all')
 
-  const filtered = subjects.filter((s) => {
+  const filtered = subjects.filter(s => {
     if (typeFilter !== 'all' && s.type !== typeFilter) return false
+    if (roleFilter !== 'all' && s.role !== roleFilter) return false
     const q = search.toLowerCase()
-    return !q || s.name.toLowerCase().includes(q) ||
-      s.aliases?.some((a) => a.toLowerCase().includes(q)) ||
+    return !q || s.name?.toLowerCase().includes(q) ||
+      s.aliases?.some(a => a.toLowerCase().includes(q)) ||
       s.description?.toLowerCase().includes(q)
   })
 
-  const selected = subjects.find((s) => s.id === selectedId) ?? null
+  const selected = subjects.find(s => s.id === selectedId) ?? null
 
-  const handleAdd = () => {
-    const id = addSubject()
-    setSelectedId(id)
-  }
-
-  const handleDelete = () => {
-    deleteSubject(selectedId)
-    setSelectedId(null)
-  }
+  const handleAdd = () => { const id = addSubject(); setSelectedId(id) }
+  const handleDelete = () => { deleteSubject(selectedId); setSelectedId(null) }
 
   return (
     <div className={styles.wrap}>
@@ -304,19 +502,19 @@ export default function SubjectsView() {
         <div className={styles.listControls}>
           <div className={styles.searchBar}>
             <span className={styles.searchIcon}>🔍</span>
-            <input className={styles.searchInput} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search…" />
+            <input className={styles.searchInput} value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…" />
             {search && <button className={styles.searchClear} onClick={() => setSearch('')}>✕</button>}
           </div>
-          <div className={styles.typeFilters}>
-            {['all','person','organization','asset'].map((t) => (
-              <button
-                key={t}
-                className={`${styles.typeFilter} ${typeFilter === t ? styles.typeFilterActive : ''}`}
-                onClick={() => setTypeFilter(t)}
-              >
-                {t === 'all' ? 'All' : TYPE_OPTIONS.find((o) => o.value === t)?.icon + ' ' + TYPE_OPTIONS.find((o) => o.value === t)?.label}
-              </button>
-            ))}
+
+          <div className={styles.filterRow}>
+            <select className={styles.filterSelect} value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+              <option value="all">All types</option>
+              {TYPE_OPTIONS.map(t => <option key={t.value} value={t.value}>{t.icon} {t.label}</option>)}
+            </select>
+            <select className={styles.filterSelect} value={roleFilter} onChange={e => setRoleFilter(e.target.value)}>
+              <option value="all">All roles</option>
+              {Object.entries(ROLES).map(([key, r]) => <option key={key} value={key}>{r.label}</option>)}
+            </select>
           </div>
         </div>
 
@@ -331,10 +529,10 @@ export default function SubjectsView() {
           )}
           {filtered.length === 0 && subjects.length > 0 && (
             <div className={styles.emptyState}>
-              <div className={styles.emptyHint}>No subjects match your filter</div>
+              <div className={styles.emptyHint}>No subjects match your filters</div>
             </div>
           )}
-          {filtered.map((s) => (
+          {filtered.map(s => (
             <SubjectCard key={s.id} subject={s} active={s.id === selectedId} onClick={() => setSelectedId(s.id)} />
           ))}
         </div>
@@ -346,7 +544,7 @@ export default function SubjectsView() {
           ? <SubjectDetail subject={selected} onDelete={handleDelete} />
           : (
             <div className={styles.detailEmpty}>
-              <div className={styles.emptyIcon}>←</div>
+              <div className={styles.emptyIcon} style={{ opacity: 0.2, fontSize: 48 }}>👤</div>
               <div className={styles.emptyTitle}>Select a subject</div>
               <div className={styles.emptyHint}>or create a new one to start building a profile</div>
             </div>

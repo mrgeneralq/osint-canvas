@@ -204,15 +204,21 @@ const useStore = create((set, get) => ({
     const subject = {
       id,
       type: 'person',
+      role: 'unknown',       // 'target' | 'poi' | 'associate' | 'witness' | 'unknown'
+      priority: 'medium',    // 'critical' | 'high' | 'medium' | 'low'
       name: '',
       aliases: [],
-      dob: '',
-      nationality: '',
-      gender: '',
-      orgType: '',
-      country: '',
+      // person fields
+      dob: '', nationality: '', gender: '', occupation: '',
+      // physical (person)
+      height: '', build: '', eyeColor: '', hairColor: '', marks: '',
+      // org fields
+      orgType: '', country: '', founded: '', industry: '',
+      // asset fields
+      assetType: '', identifier: '', owner: '', assetStatus: '',
       description: '',
       photoUrl: '',
+      onlinePresence: [],    // [{ id, platform, handle, url }]
       linkedNodeIds: [],
       createdAt: new Date().toISOString(),
       ...fields,
