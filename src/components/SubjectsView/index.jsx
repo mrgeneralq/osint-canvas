@@ -4,242 +4,277 @@ import { NODE_TYPE_CONFIG } from '../../config/nodeTypes'
 import styles from './SubjectsView.module.css'
 
 const TYPE_OPTIONS = [
-  { value: 'person', label: 'Person', icon: '👤' },
+  { value: 'person',       label: 'Person',       icon: '👤' },
   { value: 'organization', label: 'Organization', icon: '🏢' },
-  { value: 'asset', label: 'Asset', icon: '🎯' },
+  { value: 'asset',        label: 'Asset',        icon: '🎯' },
 ]
 
-const PERSON_FIELDS = [
-  { key: 'dob',         label: 'Date of birth',  placeholder: 'YYYY-MM-DD' },
-  { key: 'nationality', label: 'Nationality',     placeholder: 'e.g. American' },
-  { key: 'gender',      label: 'Gender',          placeholder: '' },
-  { key: 'occupation',  label: 'Occupation',      placeholder: '' },
-]
-
-const ORG_FIELDS = [
-  { key: 'orgType',     label: 'Type',            placeholder: 'e.g. Corporation, NGO' },
-  { key: 'country',     label: 'Country',         placeholder: '' },
-  { key: 'founded',     label: 'Founded',         placeholder: 'YYYY' },
-  { key: 'industry',    label: 'Industry',        placeholder: '' },
-]
-
-const ASSET_FIELDS = [
-  { key: 'assetType',   label: 'Asset type',      placeholder: 'e.g. Domain, Vehicle, Account' },
-  { key: 'identifier',  label: 'Identifier',      placeholder: 'IP, VIN, URL, etc.' },
-  { key: 'owner',       label: 'Owner',           placeholder: '' },
-  { key: 'status',      label: 'Status',          placeholder: 'Active / Inactive' },
-]
-
-function typeFields(type) {
-  if (type === 'organization') return ORG_FIELDS
-  if (type === 'asset') return ASSET_FIELDS
-  return PERSON_FIELDS
+const FIELDS = {
+  person:       [
+    { key: 'dob',        label: 'Date of birth', placeholder: 'YYYY-MM-DD' },
+    { key: 'nationality',label: 'Nationality',   placeholder: 'e.g. American' },
+    { key: 'gender',     label: 'Gender',        placeholder: '' },
+    { key: 'occupation', label: 'Occupation',    placeholder: '' },
+  ],
+  organization: [
+    { key: 'orgType',    label: 'Type',          placeholder: 'Corporation, NGO…' },
+    { key: 'country',    label: 'Country',       placeholder: '' },
+    { key: 'founded',    label: 'Founded',       placeholder: 'YYYY' },
+    { key: 'industry',   label: 'Industry',      placeholder: '' },
+  ],
+  asset: [
+    { key: 'assetType',  label: 'Asset type',    placeholder: 'Domain, Vehicle…' },
+    { key: 'identifier', label: 'Identifier',    placeholder: 'IP, VIN, URL…' },
+    { key: 'owner',      label: 'Owner',         placeholder: '' },
+    { key: 'assetStatus',label: 'Status',        placeholder: 'Active / Inactive' },
+  ],
 }
 
-function typeIcon(type) {
-  return TYPE_OPTIONS.find((t) => t.value === type)?.icon ?? '👤'
-}
+// ── Subject list card ─────────────────────────────────────────────────────────
+function SubjectCard({ subject, active, onClick }) {
+  const cfg = TYPE_OPTIONS.find((t) => t.value === subject.type) ?? TYPE_OPTIONS[0]
+  const initials = subject.name ? subject.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase() : '?'
 
-// ── Subject list item ─────────────────────────────────────────────────────────
-function SubjectRow({ subject, active, onClick }) {
   return (
-    <div className={`${styles.row} ${active ? styles.rowActive : ''}`} onClick={onClick}>
-      <div className={styles.rowAvatar}>
+    <div className={`${styles.card} ${active ? styles.cardActive : ''}`} onClick={onClick}>
+      <div className={styles.cardAvatar}>
         {subject.photoUrl
-          ? <img src={subject.photoUrl} alt="" className={styles.rowAvatarImg} />
-          : <span className={styles.rowAvatarIcon}>{typeIcon(subject.type)}</span>
+          ? <img src={subject.photoUrl} alt="" className={styles.cardAvatarImg} />
+          : <div className={styles.cardAvatarInitials} style={{ background: subjectColor(subject.id) }}>
+              {initials}
+            </div>
         }
+        <span className={styles.cardTypeIcon}>{cfg.icon}</span>
       </div>
-      <div className={styles.rowInfo}>
-        <div className={styles.rowName}>{subject.name || <span className={styles.unnamed}>Unnamed subject</span>}</div>
-        <div className={styles.rowMeta}>
-          <span className={styles.rowType}>{TYPE_OPTIONS.find((t) => t.value === subject.type)?.label}</span>
-          {subject.nationality && <span className={styles.rowDetail}>{subject.nationality}</span>}
-          {subject.aliases?.length > 0 && (
-            <span className={styles.rowDetail}>aka {subject.aliases.slice(0, 2).join(', ')}</span>
-          )}
+      <div className={styles.cardInfo}>
+        <div className={styles.cardName}>{subject.name || <span className={styles.unnamed}>Unnamed {cfg.label}</span>}</div>
+        <div className={styles.cardMeta}>
+          {subject.dob && <span>{subject.dob}</span>}
+          {subject.nationality && <span>{subject.nationality}</span>}
+          {subject.orgType && <span>{subject.orgType}</span>}
+          {subject.assetType && <span>{subject.assetType}</span>}
         </div>
+        {subject.aliases?.length > 0 && (
+          <div className={styles.cardAliases}>
+            aka {subject.aliases.slice(0, 3).join(' · ')}
+          </div>
+        )}
       </div>
       {subject.linkedNodeIds?.length > 0 && (
-        <span className={styles.rowLinks}>{subject.linkedNodeIds.length}</span>
+        <div className={styles.cardNodes}>
+          <span className={styles.cardNodesBadge}>{subject.linkedNodeIds.length}</span>
+          <span className={styles.cardNodesLabel}>nodes</span>
+        </div>
       )}
     </div>
   )
 }
 
+function subjectColor(id) {
+  const colors = ['#4f46e5','#0891b2','#059669','#d97706','#dc2626','#7c3aed','#db2777']
+  let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) & 0xffffffff
+  return colors[Math.abs(h) % colors.length]
+}
+
 // ── Subject detail ────────────────────────────────────────────────────────────
 function SubjectDetail({ subject, onDelete }) {
-  const updateSubject = useStore((s) => s.updateSubject)
-  const nodes         = useStore((s) => s.nodes)
-  const unlinkNode    = useStore((s) => s.unlinkNodeFromSubject)
-  const setActiveView = useStore((s) => s.setActiveView)
-  const switchCanvas  = useStore((s) => s.switchCanvas)
+  const updateSubject  = useStore((s) => s.updateSubject)
+  const nodes          = useStore((s) => s.nodes)
+  const unlinkNode     = useStore((s) => s.unlinkNodeFromSubject)
+  const setActiveView  = useStore((s) => s.setActiveView)
   const [aliasInput, setAliasInput] = useState('')
+  const [activeTab, setActiveTab]   = useState('identity')
   const aliasRef = useRef()
 
   const update = (patch) => updateSubject(subject.id, patch)
 
   const addAlias = () => {
-    const val = aliasInput.trim()
-    if (!val) return
+    const val = aliasInput.trim(); if (!val) return
     update({ aliases: [...(subject.aliases ?? []), val] })
     setAliasInput('')
     aliasRef.current?.focus()
   }
 
-  const removeAlias = (alias) =>
-    update({ aliases: subject.aliases.filter((a) => a !== alias) })
-
   const linkedNodes = nodes.filter((n) => subject.linkedNodeIds?.includes(n.id))
-
-  const goToNode = (nodeId) => {
-    setActiveView('canvas')
-    // slight delay so canvas mounts before we try to select
-    setTimeout(() => useStore.getState().setSelectedNodeId(nodeId), 150)
-  }
-
-  const fields = typeFields(subject.type)
+  const fields = FIELDS[subject.type] ?? FIELDS.person
+  const cfg = TYPE_OPTIONS.find((t) => t.value === subject.type) ?? TYPE_OPTIONS[0]
+  const initials = subject.name ? subject.name.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase() : '?'
 
   return (
     <div className={styles.detail}>
-      {/* Header */}
+      {/* Header band */}
       <div className={styles.detailHeader}>
         <div className={styles.detailAvatarWrap}>
           {subject.photoUrl
             ? <img src={subject.photoUrl} alt="" className={styles.detailAvatar} />
-            : <div className={styles.detailAvatarPlaceholder}>{typeIcon(subject.type)}</div>
+            : <div className={styles.detailAvatarInitials} style={{ background: subjectColor(subject.id) }}>
+                {initials}
+              </div>
           }
           <button
             className={styles.avatarEditBtn}
-            onClick={() => {
-              const url = window.prompt('Photo URL:', subject.photoUrl ?? '')
-              if (url !== null) update({ photoUrl: url })
-            }}
+            onClick={() => { const url = window.prompt('Photo URL:', subject.photoUrl ?? ''); if (url !== null) update({ photoUrl: url }) }}
             title="Set photo URL"
           >✎</button>
         </div>
-        <div className={styles.detailHeaderInfo}>
+
+        <div className={styles.detailMeta}>
           <input
             className={styles.detailName}
             value={subject.name}
             onChange={(e) => update({ name: e.target.value })}
             placeholder="Subject name…"
           />
-          <div className={styles.typeRow}>
+          <div className={styles.detailTypeRow}>
             {TYPE_OPTIONS.map((t) => (
               <button
                 key={t.value}
-                className={`${styles.typeBtn} ${subject.type === t.value ? styles.typeBtnActive : ''}`}
+                className={`${styles.typeChip} ${subject.type === t.value ? styles.typeChipActive : ''}`}
                 onClick={() => update({ type: t.value })}
               >
                 {t.icon} {t.label}
               </button>
             ))}
           </div>
+          {subject.aliases?.length > 0 && (
+            <div className={styles.detailAliasRow}>
+              {subject.aliases.map((a) => (
+                <span key={a} className={styles.detailAlias}>
+                  {a}
+                  <button className={styles.aliasX} onClick={() => update({ aliases: subject.aliases.filter((x) => x !== a) })}>✕</button>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
+
         <button className={styles.deleteBtn} onClick={onDelete} title="Delete subject">🗑</button>
       </div>
 
-      <div className={styles.detailBody}>
-        {/* Structured fields */}
-        <section className={styles.section}>
-          <div className={styles.sectionTitle}>Identity</div>
-          <div className={styles.fieldGrid}>
-            {fields.map(({ key, label, placeholder }) => (
-              <label key={key} className={styles.field}>
-                <span className={styles.fieldLabel}>{label}</span>
-                <input
-                  className={styles.fieldInput}
-                  value={subject[key] ?? ''}
-                  onChange={(e) => update({ [key]: e.target.value })}
-                  placeholder={placeholder}
-                />
-              </label>
-            ))}
-          </div>
-        </section>
+      {/* Tab bar */}
+      <div className={styles.tabs}>
+        {[['identity','Identity'],['notes','Notes'],['nodes','Canvas nodes']].map(([tab, label]) => (
+          <button
+            key={tab}
+            className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ''}`}
+            onClick={() => setActiveTab(tab)}
+          >
+            {label}
+            {tab === 'nodes' && linkedNodes.length > 0 && (
+              <span className={styles.tabBadge}>{linkedNodes.length}</span>
+            )}
+          </button>
+        ))}
+      </div>
 
-        {/* Aliases */}
-        <section className={styles.section}>
-          <div className={styles.sectionTitle}>Aliases / handles</div>
-          <div className={styles.aliasList}>
-            {(subject.aliases ?? []).map((alias) => (
-              <span key={alias} className={styles.aliasBadge}>
-                {alias}
-                <button className={styles.aliasRemove} onClick={() => removeAlias(alias)}>✕</button>
-              </span>
-            ))}
-          </div>
-          <div className={styles.aliasInputRow}>
-            <input
-              ref={aliasRef}
-              className={styles.aliasInput}
-              value={aliasInput}
-              onChange={(e) => setAliasInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') addAlias() }}
-              placeholder="Add alias or handle…"
-            />
-            <button className={styles.aliasAdd} onClick={addAlias}>Add</button>
-          </div>
-        </section>
-
-        {/* Description */}
-        <section className={styles.section}>
-          <div className={styles.sectionTitle}>Notes</div>
-          <textarea
-            className={styles.descTextarea}
-            value={subject.description ?? ''}
-            onChange={(e) => update({ description: e.target.value })}
-            placeholder="Background, context, open questions…"
-            rows={4}
-          />
-        </section>
-
-        {/* Linked canvas nodes */}
-        <section className={styles.section}>
-          <div className={styles.sectionTitle}>Canvas nodes ({linkedNodes.length})</div>
-          {linkedNodes.length === 0 ? (
-            <p className={styles.emptyHint}>
-              No canvas nodes linked yet. Right-click any node on the canvas and choose "Link to subject."
-            </p>
-          ) : (
-            <div className={styles.nodeList}>
-              {linkedNodes.map((node) => {
-                const cfg = NODE_TYPE_CONFIG[node.data?.nodeType] ?? {}
-                return (
-                  <div key={node.id} className={styles.nodeRow}>
-                    <span className={styles.nodeIcon} style={{ background: cfg.color }}>{cfg.icon}</span>
-                    <span className={styles.nodeLabel}>{node.data?.value || cfg.label}</span>
-                    <span className={styles.nodeType}>{cfg.label}</span>
-                    <button className={styles.nodeGo} onClick={() => goToNode(node.id)}>→ Canvas</button>
-                    <button className={styles.nodeUnlink} onClick={() => unlinkNode(subject.id, node.id)}>✕</button>
-                  </div>
-                )
-              })}
+      {/* Tab content */}
+      <div className={styles.tabContent}>
+        {activeTab === 'identity' && (
+          <div className={styles.identityTab}>
+            <div className={styles.fieldGrid}>
+              {fields.map(({ key, label, placeholder }) => (
+                <label key={key} className={styles.field}>
+                  <span className={styles.fieldLabel}>{label}</span>
+                  <input
+                    className={styles.fieldInput}
+                    value={subject[key] ?? ''}
+                    onChange={(e) => update({ [key]: e.target.value })}
+                    placeholder={placeholder}
+                  />
+                </label>
+              ))}
             </div>
-          )}
-        </section>
+
+            <div className={styles.fieldSection}>
+              <span className={styles.fieldSectionLabel}>Aliases / handles</span>
+              <div className={styles.aliasList}>
+                {(subject.aliases ?? []).length === 0 && (
+                  <span className={styles.noAliases}>None added yet</span>
+                )}
+                {(subject.aliases ?? []).map((alias) => (
+                  <span key={alias} className={styles.aliasBadge}>
+                    {alias}
+                    <button className={styles.aliasX} onClick={() => update({ aliases: subject.aliases.filter((a) => a !== alias) })}>✕</button>
+                  </span>
+                ))}
+              </div>
+              <div className={styles.aliasInputRow}>
+                <input
+                  ref={aliasRef}
+                  className={styles.aliasInput}
+                  value={aliasInput}
+                  onChange={(e) => setAliasInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') addAlias() }}
+                  placeholder="Add alias or online handle…"
+                />
+                <button className={styles.aliasAdd} onClick={addAlias}>Add</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'notes' && (
+          <div className={styles.notesTab}>
+            <textarea
+              className={styles.notesArea}
+              value={subject.description ?? ''}
+              onChange={(e) => update({ description: e.target.value })}
+              placeholder="Background, findings, open questions, behavioural patterns…"
+            />
+          </div>
+        )}
+
+        {activeTab === 'nodes' && (
+          <div className={styles.nodesTab}>
+            {linkedNodes.length === 0 ? (
+              <div className={styles.nodesEmpty}>
+                <div className={styles.nodesEmptyIcon}>🔗</div>
+                <div className={styles.nodesEmptyText}>No canvas nodes linked</div>
+                <div className={styles.nodesEmptyHint}>Right-click any node on the canvas → "Link to subject"</div>
+                <button className={styles.nodesEmptyBtn} onClick={() => setActiveView('canvas')}>Open Canvas</button>
+              </div>
+            ) : (
+              <div className={styles.nodesList}>
+                {linkedNodes.map((node) => {
+                  const ncfg = NODE_TYPE_CONFIG[node.data?.nodeType] ?? {}
+                  return (
+                    <div key={node.id} className={styles.nodeItem}>
+                      <div className={styles.nodeItemIcon} style={{ background: ncfg.color }}>{ncfg.icon}</div>
+                      <div className={styles.nodeItemInfo}>
+                        <div className={styles.nodeItemValue}>{node.data?.value || ncfg.label || '—'}</div>
+                        <div className={styles.nodeItemType}>{ncfg.label}</div>
+                      </div>
+                      <button className={styles.nodeItemGo} onClick={() => { setActiveView('canvas'); setTimeout(() => useStore.getState().setSelectedNodeId(node.id), 150) }}>
+                        → Canvas
+                      </button>
+                      <button className={styles.nodeItemUnlink} onClick={() => unlinkNode(subject.id, node.id)} title="Unlink">✕</button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-// ── Main view ─────────────────────────────────────────────────────────────────
+// ── Main ─────────────────────────────────────────────────────────────────────
 export default function SubjectsView() {
   const subjects      = useStore((s) => s.subjects)
   const addSubject    = useStore((s) => s.addSubject)
   const deleteSubject = useStore((s) => s.deleteSubject)
   const [selectedId, setSelectedId] = useState(null)
-  const [search, setSearch] = useState('')
+  const [search, setSearch]         = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
 
   const filtered = subjects.filter((s) => {
-    const matchType = typeFilter === 'all' || s.type === typeFilter
+    if (typeFilter !== 'all' && s.type !== typeFilter) return false
     const q = search.toLowerCase()
-    const matchSearch = !q || s.name.toLowerCase().includes(q) ||
+    return !q || s.name.toLowerCase().includes(q) ||
       s.aliases?.some((a) => a.toLowerCase().includes(q)) ||
       s.description?.toLowerCase().includes(q)
-    return matchType && matchSearch
   })
 
   const selected = subjects.find((s) => s.id === selectedId) ?? null
@@ -259,53 +294,48 @@ export default function SubjectsView() {
       {/* List panel */}
       <div className={styles.listPanel}>
         <div className={styles.listHeader}>
-          <div className={styles.listTitle}>Subjects</div>
+          <div>
+            <div className={styles.listTitle}>Subjects</div>
+            <div className={styles.listCount}>{subjects.length} {subjects.length === 1 ? 'subject' : 'subjects'}</div>
+          </div>
           <button className={styles.addBtn} onClick={handleAdd}>+ Add</button>
         </div>
 
-        <div className={styles.searchBar}>
-          <span className={styles.searchIcon}>🔍</span>
-          <input
-            className={styles.searchInput}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search subjects…"
-          />
-        </div>
-
-        <div className={styles.typeFilters}>
-          {['all', 'person', 'organization', 'asset'].map((t) => (
-            <button
-              key={t}
-              className={`${styles.typeFilter} ${typeFilter === t ? styles.typeFilterActive : ''}`}
-              onClick={() => setTypeFilter(t)}
-            >
-              {t === 'all' ? 'All' : TYPE_OPTIONS.find((o) => o.value === t)?.label}
-            </button>
-          ))}
+        <div className={styles.listControls}>
+          <div className={styles.searchBar}>
+            <span className={styles.searchIcon}>🔍</span>
+            <input className={styles.searchInput} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search…" />
+            {search && <button className={styles.searchClear} onClick={() => setSearch('')}>✕</button>}
+          </div>
+          <div className={styles.typeFilters}>
+            {['all','person','organization','asset'].map((t) => (
+              <button
+                key={t}
+                className={`${styles.typeFilter} ${typeFilter === t ? styles.typeFilterActive : ''}`}
+                onClick={() => setTypeFilter(t)}
+              >
+                {t === 'all' ? 'All' : TYPE_OPTIONS.find((o) => o.value === t)?.icon + ' ' + TYPE_OPTIONS.find((o) => o.value === t)?.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className={styles.list}>
-          {filtered.length === 0 && (
-            <div className={styles.emptyList}>
-              {subjects.length === 0
-                ? <>
-                    <div className={styles.emptyIcon}>👤</div>
-                    <div className={styles.emptyText}>No subjects yet</div>
-                    <div className={styles.emptyHint}>Add a person, organization, or asset you're investigating</div>
-                    <button className={styles.emptyAdd} onClick={handleAdd}>+ Add first subject</button>
-                  </>
-                : <div className={styles.emptyHint}>No subjects match your filter</div>
-              }
+          {filtered.length === 0 && subjects.length === 0 && (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyIcon}>👤</div>
+              <div className={styles.emptyTitle}>No subjects yet</div>
+              <div className={styles.emptyHint}>Add a person, organization, or asset you're investigating</div>
+              <button className={styles.emptyAddBtn} onClick={handleAdd}>+ Add first subject</button>
+            </div>
+          )}
+          {filtered.length === 0 && subjects.length > 0 && (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyHint}>No subjects match your filter</div>
             </div>
           )}
           {filtered.map((s) => (
-            <SubjectRow
-              key={s.id}
-              subject={s}
-              active={s.id === selectedId}
-              onClick={() => setSelectedId(s.id)}
-            />
+            <SubjectCard key={s.id} subject={s} active={s.id === selectedId} onClick={() => setSelectedId(s.id)} />
           ))}
         </div>
       </div>
@@ -316,9 +346,9 @@ export default function SubjectsView() {
           ? <SubjectDetail subject={selected} onDelete={handleDelete} />
           : (
             <div className={styles.detailEmpty}>
-              <div className={styles.emptyIcon}>👈</div>
-              <div className={styles.emptyText}>Select a subject</div>
-              <div className={styles.emptyHint}>or add a new one to get started</div>
+              <div className={styles.emptyIcon}>←</div>
+              <div className={styles.emptyTitle}>Select a subject</div>
+              <div className={styles.emptyHint}>or create a new one to start building a profile</div>
             </div>
           )
         }

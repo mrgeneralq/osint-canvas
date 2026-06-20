@@ -522,8 +522,10 @@ export default function OsintNode({ id, data, selected }) {
   const duplicateNode = useStore((s) => s.duplicateNode)
   const toggleNodeLock = useStore((s) => s.toggleNodeLock)
   const setSelectedNodeId = useStore((s) => s.setSelectedNodeId)
-  const allSources = useStore((s) => s.sources)
+  const allSources  = useStore((s) => s.sources)
   const nodeSources = allSources.filter((s) => (data.sourceIds ?? []).includes(s.id))
+  const linkedSubjects = useStore((s) => s.subjects.filter((sub) => sub.linkedNodeIds?.includes(id)))
+  const setActiveView  = useStore((s) => s.setActiveView)
 
   const update = useCallback((patch) => updateNodeData(id, patch), [id, updateNodeData])
   const collapsed = data.collapsed ?? false
@@ -618,6 +620,15 @@ export default function OsintNode({ id, data, selected }) {
         <span className={styles.icon} style={{ background: cfg.color }}>{cfg.icon}</span>
         <span className={styles.typeLabel}>{cfg.label}</span>
         {data.locked && <span className={styles.lockBadge}>🔒</span>}
+        {linkedSubjects.length > 0 && (
+          <span
+            className={styles.subjectBadge}
+            title={linkedSubjects.map((s) => s.name || 'Unnamed').join(', ')}
+            onClick={(e) => { e.stopPropagation(); setActiveView('subjects') }}
+          >
+            👤 {linkedSubjects.length > 1 ? linkedSubjects.length : (linkedSubjects[0].name || '—')}
+          </span>
+        )}
         <span
           className={styles.confidenceBadge}
           style={{ color: confidence.color, borderColor: confidence.color + '44', background: confidence.bg }}
