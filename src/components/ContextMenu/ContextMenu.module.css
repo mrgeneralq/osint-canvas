@@ -69,3 +69,54 @@
   font-size: 11px;
   flex-shrink: 0;
 }
+
+/* ── merge picker ──────────────────────────────────────────────────────────── */
+.mergePicker {
+  margin: 3px 5px;
+  border: 1px solid var(--border-mid);
+  border-radius: 7px;
+  background: var(--bg-base);
+  overflow: hidden;
+}
+
+.mergeSearch {
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 11px;
+  padding: 6px 9px;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.mergeList {
+  max-height: 160px;
+  overflow-y: auto;
+}
+.mergeList::-webkit-scrollbar { width: 3px; }
+.mergeList::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 4px; }
+
+.mergeItem {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 5px 9px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.mergeItem:hover { background: var(--bg-elevated); color: var(--text-primary); }
+
+.mergeItemVal {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -655,6 +655,52 @@ const useStore = create((set, get) => ({
   setHighlight: (nodeIds, edgeIds) => set({ highlightNodeIds: nodeIds, highlightEdgeIds: edgeIds }),
   clearHighlight: () => set({ highlightNodeIds: null, highlightEdgeIds: null, pathPickMode: false, pathPickFirst: null }),
 
+  // Navigate from timeline to the node on its canvas and highlight it
+  goToCanvasNode: (canvasId, nodeId) => {
+    const { switchCanvas, setHighlight, edges } = get()
+    switchCanvas(canvasId)
+    set({ activeView: 'canvas', selectedNodeId: nodeId })
+    // highlight connected edges too
+    const connectedEdges = new Set(
+      edges.filter((e) => e.source === nodeId || e.target === nodeId).map((e) => e.id)
+    )
+    setHighlight(new Set([nodeId]), connectedEdges)
+  },
+
+  // Merge absorbId into keepId: redirect all edges, delete the absorbed node
+  mergeNodes: (keepId, absorbId) => {
+    if (keepId === absorbId) return
+    get()._pushHistory()
+    const { nodes, edges } = get()
+    const absorbed = nodes.find((n) => n.id === absorbId)
+    const kept = nodes.find((n) => n.id === keepId)
+    if (!absorbed || !kept) return
+
+    // Redirect edges; drop self-loops created by the merge
+    const newEdges = edges
+      .map((e) => ({
+        ...e,
+        source: e.source === absorbId ? keepId : e.source,
+        target: e.target === absorbId ? keepId : e.target,
+      }))
+      .filter((e) => e.source !== e.target)
+      // deduplicate: keep first occurrence of each source→target pair
+      .filter((e, i, arr) => arr.findIndex((x) => x.source === e.source && x.target === e.target) === i)
+
+    // Append absorbed node's value as an alias in the kept node's note
+    const aliasLine = absorbed.data.value ? `\nAlias: ${absorbed.data.value}` : ''
+    const newNote = (kept.data.note ?? '') + aliasLine
+
+    set({
+      nodes: nodes.filter((n) => n.id !== absorbId).map((n) =>
+        n.id === keepId ? { ...n, data: { ...n.data, note: newNote } } : n
+      ),
+      edges: newEdges,
+      selectedNodeId: keepId,
+    })
+    toast.success(`Merged "${absorbed.data.value || absorbId}" into "${kept.data.value || keepId}"`)
+  },
+
   startPathPick: () => {
     set({ pathPickMode: true, pathPickFirst: null, highlightNodeIds: null, highlightEdgeIds: null })
     toast.info('Click a starting node, then a destination node')

@@ -200,3 +200,40 @@
   border-radius: 6px;
   border: 1px solid var(--border-subtle);
 }
+
+/* ── analytics ──────────────────────────────────────────────────────────────── */
+.analyticsLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-dimmed);
+  padding: 2px 6px 4px;
+  margin: 0;
+}
+
+.degBadge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--accent);
+  background: rgba(124,140,248,0.12);
+  border-radius: 8px;
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+
+.isolatedBtn {
+  width: 100%;
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-radius: 6px;
+  color: #f59e0b;
+  font-size: 10px;
+  font-family: inherit;
+  padding: 5px 8px;
+  cursor: pointer;
+  text-align: left;
+  margin-top: 4px;
+}
+.isolatedBtn:hover { background: rgba(245,158,11,0.15); }

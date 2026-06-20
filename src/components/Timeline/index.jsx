@@ -117,8 +117,11 @@ export default function Timeline() {
     setEditingId(null)
   }
 
+  const goToCanvasNode = useStore((s) => s.goToCanvasNode)
+
   const goToNode = (entry) => {
-    if (entry.canvasId) setActiveView('canvas')
+    if (entry.canvasId && entry.nodeId) goToCanvasNode(entry.canvasId, entry.nodeId)
+    else setActiveView('canvas')
   }
 
   // Group entries by year-month for section headers

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useReactFlow } from '@xyflow/react'
 import useStore from '../../store/useStore'
 import { NODE_TYPE_CONFIG, PALETTE_GROUPS } from '../../config/nodeTypes'
@@ -45,6 +45,77 @@ function NodeGrid() {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+function AnalyticsSection() {
+  const nodes = useStore((s) => s.nodes)
+  const edges = useStore((s) => s.edges)
+  const setHighlight = useStore((s) => s.setHighlight)
+  const setSelectedNodeId = useStore((s) => s.setSelectedNodeId)
+  const [open, setOpen] = useState(false)
+
+  const stats = useMemo(() => {
+    const degree = {}
+    for (const n of nodes) degree[n.id] = 0
+    for (const e of edges) {
+      if (degree[e.source] !== undefined) degree[e.source]++
+      if (degree[e.target] !== undefined) degree[e.target]++
+    }
+    const sorted = nodes
+      .map((n) => ({ node: n, deg: degree[n.id] ?? 0 }))
+      .sort((a, b) => b.deg - a.deg)
+    const isolated = sorted.filter((x) => x.deg === 0)
+    return { sorted, isolated }
+  }, [nodes, edges])
+
+  const highlight = (nodeId) => {
+    setSelectedNodeId(nodeId)
+    const connEdges = new Set(edges.filter((e) => e.source === nodeId || e.target === nodeId).map((e) => e.id))
+    setHighlight(new Set([nodeId]), connEdges)
+  }
+
+  const highlightIsolated = () => {
+    const ids = new Set(stats.isolated.map((x) => x.node.id))
+    setHighlight(ids, new Set())
+  }
+
+  return (
+    <div className={styles.section}>
+      <button className={styles.sectionHeader} onClick={() => setOpen((v) => !v)}>
+        <span className={styles.sectionIcon}>{open ? '▾' : '▸'}</span>
+        <span className={styles.sectionLabel}>Analytics</span>
+        <span style={{ fontSize: 10, color: 'var(--text-dimmed)', marginLeft: 'auto', paddingRight: 4 }}>
+          {nodes.length} nodes
+        </span>
+      </button>
+      {open && (
+        <div className={styles.items}>
+          {nodes.length === 0 ? (
+            <p className={styles.emptyHint}>No nodes on canvas yet.</p>
+          ) : (
+            <>
+              <p className={styles.analyticsLabel}>Most connected</p>
+              {stats.sorted.slice(0, 8).map(({ node, deg }) => {
+                const cfg = NODE_TYPE_CONFIG[node.data?.nodeType] ?? {}
+                return (
+                  <div key={node.id} className={styles.item} onClick={() => highlight(node.id)}>
+                    <span className={styles.itemIcon}>{cfg.icon}</span>
+                    <span className={styles.itemName}>{node.data?.value || cfg.label || node.id}</span>
+                    <span className={styles.degBadge}>{deg}</span>
+                  </div>
+                )
+              })}
+              {stats.isolated.length > 0 && (
+                <button className={styles.isolatedBtn} onClick={highlightIsolated}>
+                  ⚠ {stats.isolated.length} isolated node{stats.isolated.length !== 1 ? 's' : ''}
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -186,6 +257,9 @@ export default function WorkspaceSidebar() {
             </div>
           )}
         </div>
+
+        {/* Analytics */}
+        <AnalyticsSection />
       </div>
     </div>
   )

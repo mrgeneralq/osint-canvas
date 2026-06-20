@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NODE_TYPE_CONFIG, CONFIDENCE_LEVELS } from '../../config/nodeTypes'
 import { LOOKUP_URLS } from '../../config/lookupUrls'
 import useStore from '../../store/useStore'
@@ -13,7 +13,10 @@ export default function ContextMenu({ x, y, nodeId, onClose }) {
   const toggleNodeLock = useStore((s) => s.toggleNodeLock)
   const startPathPick = useStore((s) => s.startPathPick)
   const setHighlight = useStore((s) => s.setHighlight)
+  const mergeNodes = useStore((s) => s.mergeNodes)
   const edges = useStore((s) => s.edges)
+  const [showMergePicker, setShowMergePicker] = useState(false)
+  const [mergeSearch, setMergeSearch] = useState('')
 
   const node = nodes.find((n) => n.id === nodeId)
   if (!node) return null
@@ -80,6 +83,36 @@ export default function ContextMenu({ x, y, nodeId, onClose }) {
       <div className={styles.sep} />
       <Item icon="⧉" label="Duplicate" onClick={() => act(() => duplicateNode(nodeId))} />
       <Item icon={node.data.locked ? '🔓' : '🔒'} label={node.data.locked ? 'Unlock position' : 'Lock position'} onClick={() => act(() => toggleNodeLock(nodeId))} />
+      <Item icon="⇢" label="Merge into…" onClick={() => setShowMergePicker((v) => !v)} />
+
+      {showMergePicker && (
+        <div className={styles.mergePicker}>
+          <input
+            autoFocus
+            className={styles.mergeSearch}
+            placeholder="Search nodes…"
+            value={mergeSearch}
+            onChange={(e) => setMergeSearch(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <div className={styles.mergeList}>
+            {nodes
+              .filter((n) => n.id !== nodeId)
+              .filter((n) => !mergeSearch || (n.data.value ?? '').toLowerCase().includes(mergeSearch.toLowerCase()))
+              .slice(0, 12)
+              .map((n) => {
+                const ncfg = NODE_TYPE_CONFIG[n.data.nodeType] ?? {}
+                return (
+                  <button key={n.id} className={styles.mergeItem} onClick={() => { mergeNodes(n.id, nodeId); onClose() }}>
+                    <span>{ncfg.icon}</span>
+                    <span className={styles.mergeItemVal}>{n.data.value || ncfg.label || n.id}</span>
+                  </button>
+                )
+              })}
+          </div>
+        </div>
+      )}
+
       <div className={styles.sep} />
       <Item icon="✕" label="Delete node" danger onClick={() => act(() => deleteNode(nodeId))} />
     </div>
