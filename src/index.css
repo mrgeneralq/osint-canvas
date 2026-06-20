@@ -21,21 +21,21 @@
 
 /* ── Light theme ────────────────────────────────────────────────────────────── */
 [data-theme="light"] {
-  --bg-base:       #f0f2f8;
-  --bg-surface:    #ffffff;
-  --bg-elevated:   #e8ebf5;
-  --bg-hover:      #dde1f0;
-  --border-subtle: #d4d8ed;
-  --border-mid:    #b8bedd;
-  --border-strong: #8a93c4;
-  --accent:        #4f5fe8;
-  --accent-light:  #7c8cf8;
-  --text-primary:  #12152e;
-  --text-secondary:#2d3460;
-  --text-muted:    #5a607a;
-  --text-dimmed:   #8890b0;
-  --danger:        #dc2626;
-  --danger-bg:     #fef2f2;
+  --bg-base:       #e8eaf2;
+  --bg-surface:    #f0f2f9;
+  --bg-elevated:   #dde0ef;
+  --bg-hover:      #d0d4e8;
+  --border-subtle: #bcc1d8;
+  --border-mid:    #9aa0c0;
+  --border-strong: #6b739e;
+  --accent:        #3a48d5;
+  --accent-light:  #5b6af0;
+  --text-primary:  #0c0f24;
+  --text-secondary:#1e2450;
+  --text-muted:    #3d4470;
+  --text-dimmed:   #6068a0;
+  --danger:        #b91c1c;
+  --danger-bg:     #fee2e2;
 }
 
 html, body, #root {
