@@ -1,5 +1,4 @@
 import { useState, useRef, useMemo } from 'react'
-import { useReactFlow } from '@xyflow/react'
 import useStore from '../../store/useStore'
 import { NODE_TYPE_CONFIG, PALETTE_GROUPS } from '../../config/nodeTypes'
 import styles from './NavSidebar.module.css'
@@ -8,8 +7,6 @@ const STATUS_COLORS = { Active: '#4ade80', Pending: '#facc15', Cold: '#60a5fa', 
 
 function NodeGrid({ onAdd }) {
   const addNode = useStore((s) => s.addNode)
-  let rf = null
-  try { rf = useReactFlow() } catch {}
 
   const onDragStart = (e, type) => {
     e.dataTransfer.setData('application/osint-node-type', type)
@@ -17,14 +14,7 @@ function NodeGrid({ onAdd }) {
   }
 
   const handleClick = (type) => {
-    if (rf) {
-      const vp = rf.getViewport()
-      const cx = (window.innerWidth / 2 - vp.x) / vp.zoom
-      const cy = (window.innerHeight / 2 - vp.y) / vp.zoom
-      addNode(type, { x: cx - 110, y: cy - 50 })
-    } else {
-      addNode(type)
-    }
+    addNode(type)
   }
 
   return (
