@@ -1,4 +1,5 @@
-.layout {
+/* Full-screen workspace shell */
+.workspace {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -6,25 +7,34 @@
   overflow: hidden;
 }
 
-.main {
+/* Below the toolbar: nav + content side by side */
+.body {
   display: flex;
   flex: 1;
   overflow: hidden;
   min-height: 0;
 }
 
-.center {
+/* Main content area — fills remaining space */
+.content {
   flex: 1;
   min-width: 0;
   display: flex;
   overflow: hidden;
 }
 
-.panel {
+/* Canvas-specific shell: canvas + properties panel */
+.canvasShell {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.props {
   flex-shrink: 0;
   overflow: hidden;
   transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-.panelOpen  { width: 260px; }
-.panelClosed { width: 0 !important; }
+.propsOpen  { width: 260px; }
+.propsClosed { width: 0 !important; }

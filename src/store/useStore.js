@@ -119,7 +119,7 @@ const useStore = create((set, get) => ({
       nodeCounter = maxId + 1
       set({
         activeCaseId: id,
-        activeView: 'canvas',
+        activeView: 'overview',
         canvases,
         activeCanvasId,
         notes: data.notes ?? [],

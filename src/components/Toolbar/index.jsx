@@ -143,15 +143,6 @@ export default function Toolbar({ onExportPng, canvasRef, onToggleProps, propsOp
           ⬇ Export
         </button>
 
-        {/* Theme toggle */}
-        <button
-          className={styles.iconBtn}
-          onClick={onToggleTheme}
-          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-        >
-          {theme === 'dark' ? '☀️' : '🌙'}
-        </button>
-
         {/* More dropdown */}
         <div className={styles.moreWrap} ref={moreRef}>
           <button className={`${styles.btn} ${showMore ? styles.active : ''}`} onClick={() => setShowMore((v) => !v)}>

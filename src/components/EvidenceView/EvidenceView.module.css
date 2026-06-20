@@ -1,0 +1,20 @@
+.wrap { flex: 1; overflow-y: auto; padding: 32px 36px; background: var(--bg-base); }
+.header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; }
+.title { font-size: 22px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
+.subtitle { font-size: 13px; color: var(--text-muted); }
+.addBtn {
+  padding: 8px 16px; border-radius: 8px; background: var(--accent); border: none;
+  color: #fff; font-size: 13px; font-weight: 600; cursor: not-allowed; opacity: 0.5; font-family: inherit;
+}
+.comingSoon {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: 14px; padding: 48px 40px; text-align: center;
+}
+.csIcon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+.csTitle { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; }
+.csDesc { font-size: 13px; color: var(--text-muted); line-height: 1.6; max-width: 520px; margin: 0 auto 36px; }
+.csFeatures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: left; }
+.feature { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 16px; }
+.featureIcon { font-size: 20px; margin-bottom: 8px; }
+.featureLabel { font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.featureDesc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
