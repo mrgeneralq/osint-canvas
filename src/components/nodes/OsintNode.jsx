@@ -621,13 +621,6 @@ export default function OsintNode({ id, data, selected }) {
         <span className={styles.icon} style={{ background: cfg.color }}>{cfg.icon}</span>
         <span className={styles.typeLabel}>{cfg.label}</span>
         {data.locked && <span className={styles.lockBadge}>🔒</span>}
-        {linkedSubjects.length > 0 && (
-          <span
-            className={styles.subjectDot}
-            title={`Linked: ${linkedSubjects.map((s) => s.name || 'Unnamed').join(', ')}`}
-            onClick={(e) => { e.stopPropagation(); setActiveView('subjects') }}
-          >👤</span>
-        )}
         <span
           className={styles.confidenceBadge}
           style={{ color: confidence.color, borderColor: confidence.color + '44', background: confidence.bg }}
