@@ -72,7 +72,7 @@ function WorkspaceView({ theme, onToggleTheme }) {
           {activeView === 'note'      && <NoteEditor noteId={activeNoteId} />}
           {/* Canvas stays mounted to avoid hooks violations on remount */}
           <div className={styles.canvasShell} style={{ display: isCanvas ? 'flex' : 'none' }}>
-            <Canvas exportRef={exportRef} />
+            <Canvas exportRef={exportRef} active={isCanvas} />
             <div className={`${styles.props} ${propsOpen ? styles.propsOpen : styles.propsClosed}`}>
               <NodeProperties />
             </div>

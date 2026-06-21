@@ -20,15 +20,15 @@ const nodeTypes = { osint: OsintNode }
 const edgeTypes = { osint: OsintEdge }
 const defaultEdgeOptions = { type: 'osint', data: { label: '', relationshipType: 'default' } }
 
-export default function Canvas({ exportRef }) {
+export default function Canvas({ exportRef, active }) {
   return (
     <ReactFlowProvider>
-      <CanvasInner exportRef={exportRef} />
+      <CanvasInner exportRef={exportRef} active={active} />
     </ReactFlowProvider>
   )
 }
 
-function CanvasInner({ exportRef }) {
+function CanvasInner({ exportRef, active }) {
   const {
     nodes, edges,
     onNodesChange, onEdgesChange, onConnect, onNodeDragStop,
@@ -41,6 +41,16 @@ function CanvasInner({ exportRef }) {
   const selectedCount = nodes.filter((n) => n.selected).length
 
   const { screenToFlowPosition, fitView } = useReactFlow()
+
+  // fitView when canvas becomes visible for the first time (was hidden while mounted)
+  const wasActive = useRef(false)
+  useEffect(() => {
+    if (active && !wasActive.current) {
+      wasActive.current = true
+      setTimeout(() => fitView({ padding: 0.3 }), 50)
+    }
+  }, [active, fitView])
+
   const [ctxMenu, setCtxMenu] = useState(null)
   const [quickAdd, setQuickAdd] = useState(null) // { screenX, screenY, flowX, flowY, sourceNodeId? }
   const [edgePicker, setEdgePicker] = useState(null) // { screenX, screenY, edgeId }
