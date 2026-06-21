@@ -524,7 +524,8 @@ export default function OsintNode({ id, data, selected }) {
   const setSelectedNodeId = useStore((s) => s.setSelectedNodeId)
   const allSources  = useStore((s) => s.sources)
   const nodeSources = allSources.filter((s) => (data.sourceIds ?? []).includes(s.id))
-  const linkedSubjects = useStore((s) => s.subjects.filter((sub) => sub.linkedNodeIds?.includes(id)))
+  const allSubjects = useStore((s) => s.subjects)
+  const linkedSubjects = allSubjects.filter((sub) => sub.linkedNodeIds?.includes(id))
   const setActiveView  = useStore((s) => s.setActiveView)
 
   const update = useCallback((patch) => updateNodeData(id, patch), [id, updateNodeData])

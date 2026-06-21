@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { ReactFlowProvider } from '@xyflow/react'
 import LZString from 'lz-string'
 import Toolbar from './components/Toolbar'
 import Canvas from './components/Canvas'
@@ -71,14 +70,13 @@ function WorkspaceView({ theme, onToggleTheme }) {
           {activeView === 'timeline'  && <Timeline />}
           {activeView === 'sources'   && <SourcesView onOpenProposals={() => setProposalsOpen(true)} />}
           {activeView === 'note'      && <NoteEditor noteId={activeNoteId} />}
-          {isCanvas && (
-            <div className={styles.canvasShell}>
-              <Canvas exportRef={exportRef} />
-              <div className={`${styles.props} ${propsOpen ? styles.propsOpen : styles.propsClosed}`}>
-                <NodeProperties />
-              </div>
+          {/* Canvas stays mounted to avoid hooks violations on remount */}
+          <div className={styles.canvasShell} style={{ display: isCanvas ? 'flex' : 'none' }}>
+            <Canvas exportRef={exportRef} />
+            <div className={`${styles.props} ${propsOpen ? styles.propsOpen : styles.propsClosed}`}>
+              <NodeProperties />
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -124,9 +122,9 @@ export default function App() {
   }
 
   return (
-    <ReactFlowProvider>
+    <>
       <WorkspaceView theme={theme} onToggleTheme={toggleTheme} />
       <ToastContainer />
-    </ReactFlowProvider>
+    </>
   )
 }

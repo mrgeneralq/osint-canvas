@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ReactFlow, Background, Controls, MiniMap,
-  BackgroundVariant, useReactFlow, SelectionMode,
+  BackgroundVariant, useReactFlow, SelectionMode, ReactFlowProvider,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { toPng } from 'html-to-image'
@@ -21,6 +21,14 @@ const edgeTypes = { osint: OsintEdge }
 const defaultEdgeOptions = { type: 'osint', data: { label: '', relationshipType: 'default' } }
 
 export default function Canvas({ exportRef }) {
+  return (
+    <ReactFlowProvider>
+      <CanvasInner exportRef={exportRef} />
+    </ReactFlowProvider>
+  )
+}
+
+function CanvasInner({ exportRef }) {
   const {
     nodes, edges,
     onNodesChange, onEdgesChange, onConnect, onNodeDragStop,
