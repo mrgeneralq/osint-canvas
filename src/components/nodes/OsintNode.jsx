@@ -623,12 +623,10 @@ export default function OsintNode({ id, data, selected }) {
         {data.locked && <span className={styles.lockBadge}>🔒</span>}
         {linkedSubjects.length > 0 && (
           <span
-            className={styles.subjectBadge}
-            title={linkedSubjects.map((s) => s.name || 'Unnamed').join(', ')}
+            className={styles.subjectDot}
+            title={`Linked: ${linkedSubjects.map((s) => s.name || 'Unnamed').join(', ')}`}
             onClick={(e) => { e.stopPropagation(); setActiveView('subjects') }}
-          >
-            👤 {linkedSubjects.length > 1 ? linkedSubjects.length : (linkedSubjects[0].name || '—')}
-          </span>
+          >👤</span>
         )}
         <span
           className={styles.confidenceBadge}
