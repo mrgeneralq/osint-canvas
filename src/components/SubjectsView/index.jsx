@@ -42,29 +42,36 @@ const PLATFORMS = [
 ]
 
 const PERSON_FIELDS = [
-  { key: 'dob',        label: 'Date of birth',  placeholder: 'YYYY-MM-DD', span: 1 },
-  { key: 'nationality',label: 'Nationality',    placeholder: 'e.g. American', span: 1 },
-  { key: 'gender',     label: 'Gender',         placeholder: '', span: 1 },
-  { key: 'occupation', label: 'Occupation',     placeholder: '', span: 1 },
+  { key: 'dob',         label: 'Date of birth', type: 'date', span: 1 },
+  { key: 'nationality', label: 'Nationality',   type: 'text', placeholder: 'e.g. American', span: 1 },
+  { key: 'gender',      label: 'Gender',        type: 'select', span: 1,
+    options: ['Male','Female','Non-binary','Other','Unknown'] },
+  { key: 'occupation',  label: 'Occupation',    type: 'text', placeholder: 'e.g. Software engineer', span: 1 },
 ]
 const PERSON_PHYSICAL = [
-  { key: 'height',   label: 'Height',      placeholder: 'e.g. 180 cm' },
-  { key: 'build',    label: 'Build',       placeholder: 'Slim / Athletic…' },
-  { key: 'eyeColor', label: 'Eye colour',  placeholder: '' },
-  { key: 'hairColor',label: 'Hair colour', placeholder: '' },
-  { key: 'marks',    label: 'Distinguishing marks', placeholder: 'Tattoos, scars…' },
+  { key: 'height',    label: 'Height',               type: 'text', placeholder: 'e.g. 180 cm / 5\'11"' },
+  { key: 'build',     label: 'Build',                type: 'select',
+    options: ['Slim','Athletic','Average','Heavy-set','Muscular','Unknown'] },
+  { key: 'eyeColor',  label: 'Eye colour',           type: 'select',
+    options: ['Brown','Blue','Green','Hazel','Gray','Amber','Unknown'] },
+  { key: 'hairColor', label: 'Hair colour',          type: 'select',
+    options: ['Black','Dark brown','Brown','Blonde','Red','Gray','White','Bald','Unknown'] },
+  { key: 'marks',     label: 'Distinguishing marks', type: 'textarea', placeholder: 'Tattoos, scars, piercings…', span: 2 },
 ]
 const ORG_FIELDS = [
-  { key: 'orgType',  label: 'Type',     placeholder: 'Corporation, NGO…' },
-  { key: 'country',  label: 'Country',  placeholder: '' },
-  { key: 'founded',  label: 'Founded',  placeholder: 'YYYY' },
-  { key: 'industry', label: 'Industry', placeholder: '' },
+  { key: 'orgType',  label: 'Organisation type', type: 'select', span: 1,
+    options: ['Corporation','LLC','Partnership','NGO / Non-profit','Government','Military','Criminal','Other'] },
+  { key: 'country',  label: 'Country / HQ',      type: 'text', placeholder: '', span: 1 },
+  { key: 'founded',  label: 'Founded',            type: 'number', placeholder: 'YYYY', span: 1 },
+  { key: 'industry', label: 'Industry / Sector',  type: 'text', placeholder: 'e.g. Finance, Tech', span: 1 },
 ]
 const ASSET_FIELDS = [
-  { key: 'assetType',   label: 'Asset type',  placeholder: 'Domain, Vehicle…' },
-  { key: 'identifier',  label: 'Identifier',  placeholder: 'IP, VIN, URL…' },
-  { key: 'owner',       label: 'Owner',       placeholder: '' },
-  { key: 'assetStatus', label: 'Status',      placeholder: 'Active / Inactive' },
+  { key: 'assetType',   label: 'Asset type',  type: 'select', span: 1,
+    options: ['Domain / Website','IP Address','Email address','Phone number','Vehicle','Property / Real estate','Cryptocurrency wallet','Bank account','Document','Social media account','Other'] },
+  { key: 'identifier',  label: 'Identifier',  type: 'text', placeholder: 'IP, VIN, URL, IBAN…', span: 1 },
+  { key: 'owner',       label: 'Owner',       type: 'text', placeholder: '', span: 1 },
+  { key: 'assetStatus', label: 'Status',      type: 'select', span: 1,
+    options: ['Active','Inactive','Seized','Transferred','Unknown'] },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -141,11 +148,35 @@ function SubjectCard({ subject, active, onClick }) {
 
 // ── Detail ────────────────────────────────────────────────────────────────────
 
-function Field({ label, value, placeholder, onChange, span }) {
+function Field({ label, value, placeholder, onChange, span, type = 'text', options }) {
+  const cls = `${styles.field} ${span === 2 ? styles.fieldSpan2 : ''}`
+  const inputCls = styles.fieldInput
+
+  if (type === 'select') {
+    return (
+      <label className={cls}>
+        <span className={styles.fieldLabel}>{label}</span>
+        <select className={`${inputCls} ${styles.fieldSelect}`} value={value ?? ''} onChange={e => onChange(e.target.value)}>
+          <option value="">— select —</option>
+          {options.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      </label>
+    )
+  }
+
+  if (type === 'textarea') {
+    return (
+      <label className={cls}>
+        <span className={styles.fieldLabel}>{label}</span>
+        <textarea className={`${inputCls} ${styles.fieldTextarea}`} value={value ?? ''} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={3} />
+      </label>
+    )
+  }
+
   return (
-    <label className={`${styles.field} ${span === 2 ? styles.fieldSpan2 : ''}`}>
+    <label className={cls}>
       <span className={styles.fieldLabel}>{label}</span>
-      <input className={styles.fieldInput} value={value ?? ''} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
+      <input className={inputCls} type={type} value={value ?? ''} onChange={e => onChange(e.target.value)} placeholder={placeholder} />
     </label>
   )
 }
@@ -368,7 +399,7 @@ function SubjectDetail({ subject, onDelete }) {
               <div className={styles.fieldSectionLabel}>Basic information</div>
               <div className={styles.fieldGrid}>
                 {identityFields.map(f => (
-                  <Field key={f.key} label={f.label} value={subject[f.key]} placeholder={f.placeholder} onChange={v => update({ [f.key]: v })} />
+                  <Field key={f.key} label={f.label} value={subject[f.key]} placeholder={f.placeholder} type={f.type} options={f.options} span={f.span} onChange={v => update({ [f.key]: v })} />
                 ))}
               </div>
             </div>
@@ -385,7 +416,7 @@ function SubjectDetail({ subject, onDelete }) {
                 {physOpen && (
                   <div className={styles.fieldGrid}>
                     {PERSON_PHYSICAL.map(f => (
-                      <Field key={f.key} label={f.label} value={subject[f.key]} placeholder={f.placeholder} onChange={v => update({ [f.key]: v })} />
+                      <Field key={f.key} label={f.label} value={subject[f.key]} placeholder={f.placeholder} type={f.type} options={f.options} span={f.span} onChange={v => update({ [f.key]: v })} />
                     ))}
                   </div>
                 )}
